@@ -8,9 +8,9 @@ import { PageLoader } from '@/components/shared/feedback/page-loader'
 import { EmptyState } from '@/components/shared/feedback/empty-state'
 import { FormDialog } from '@/components/shared/forms/form-dialog'
 import { ConfirmDialog } from '@/components/shared/forms/confirm-dialog'
-import { SearchBar } from '@/components/shared/forms/search-bar'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FeatureForm } from './feature-form'
+import { FeatureBoardFilters, type FeatureBoardFilterValues } from './feature-board-filters'
 import { KanbanColumn } from './kanban-column'
 import { BOARD_TAB_ACCENT } from './board-tab-accent'
 import { cn } from '@/utils/cn'
@@ -35,24 +35,36 @@ interface KanbanBoardProps {
   canManageStatus: boolean
 }
 
+const EMPTY_FILTERS: FeatureBoardFilterValues = {
+  search: '',
+  priority: undefined,
+  platform: undefined,
+  categoryId: undefined,
+}
+
 function defaultPlatformForTab(tab: FeatureBoardTab): FeaturePlatform {
   return tab === 'Web' ? 'Website' : 'App'
 }
 
 export function KanbanBoard({ basePath, canManageStatus }: KanbanBoardProps) {
   const [tab, setTab] = useState<FeatureBoardTab>('Web')
-  const [search, setSearch] = useState('')
+  const [filters, setFilters] = useState<FeatureBoardFilterValues>(EMPTY_FILTERS)
   const [createStatus, setCreateStatus] = useState<FeatureStatus>('Idea')
   const [createOpen, setCreateOpen] = useState(false)
   const [editFeature, setEditFeature] = useState<IFeatureEntity | null>(null)
   const [deleteId, setDeleteId] = useState<string | null>(null)
 
-  const debouncedSearch = useDebounce(search, 300)
+  const debouncedSearch = useDebounce(filters.search, 300)
   const {
     data: allFeatures = [],
     isLoading,
     error,
-  } = useGetFeatures({ search: debouncedSearch || undefined })
+  } = useGetFeatures({
+    search: debouncedSearch || undefined,
+    priority: filters.priority,
+    platform: filters.platform,
+    categoryId: filters.categoryId,
+  })
 
   const upsert = useUpsertFeature()
   const deleteFeature = useDeleteFeature()
@@ -85,7 +97,7 @@ export function KanbanBoard({ basePath, canManageStatus }: KanbanBoardProps) {
   return (
     <div className="flex h-full flex-col gap-4">
       <PageHeader title="Features" description="Track Web and App delivery on separate boards.">
-        <SearchBar value={search} onChange={setSearch} className="w-48" />
+        <FeatureBoardFilters values={filters} onChange={setFilters} />
       </PageHeader>
 
       {error && (

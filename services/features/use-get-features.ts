@@ -21,6 +21,8 @@ export function useGetFeatures(filters?: IFeatureFilters) {
 
       if (filters?.status) query = query.eq('status', filters.status)
       if (filters?.priority) query = query.eq('priority', filters.priority)
+      if (filters?.platform) query = query.eq('platform', filters.platform)
+      if (filters?.categoryId) query = query.eq('category_id', filters.categoryId)
       if (filters?.search) query = query.ilike('title', `%${filters.search}%`)
 
       const { data: rows, error } = await query

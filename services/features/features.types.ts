@@ -28,6 +28,8 @@ export interface IFeatureEntity {
 export interface IFeatureFilters {
   status?: FeatureStatus
   priority?: FeaturePriority
+  platform?: FeaturePlatform
+  categoryId?: string
   search?: string
 }
 
