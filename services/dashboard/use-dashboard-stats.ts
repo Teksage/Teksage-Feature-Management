@@ -4,11 +4,13 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { QUERY_KEYS, STALE_TIME } from '@/lib/constants'
 import { daysUntil } from '@/utils/format'
+import { FEATURE_SELECT, mapFeatureRow } from '@/services/features/map-feature'
 import type { IFeatureEntity } from '@/services/features/features.types'
 
 export interface IDashboardStats {
   totalFeatures: number
   byStatus: Record<string, number>
+  byPriority: Record<string, number>
   overdueCount: number
   allFeatures: IFeatureEntity[]
   topVoted: IFeatureEntity[]
@@ -23,7 +25,7 @@ export function useDashboardStats() {
 
       const { data: features, error } = await supabase
         .from('features')
-        .select('*, feature_categories(name), profiles!created_by(full_name)')
+        .select(FEATURE_SELECT)
         .order('created_at', { ascending: false })
       if (error) throw error
 
@@ -38,19 +40,19 @@ export function useDashboardStats() {
         voteCounts[v.feature_id] = (voteCounts[v.feature_id] ?? 0) + 1
       }
 
-      const enriched: IFeatureEntity[] = (features ?? []).map((f) => ({
-        ...f,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        category_name: (f.feature_categories as any)?.name ?? null,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        creator_full_name: (f.profiles as any)?.full_name ?? null,
-        vote_count: voteCounts[f.id] ?? 0,
-        has_voted: false,
-      }))
+      const enriched = (features ?? []).map((f) =>
+        mapFeatureRow(
+          f as Parameters<typeof mapFeatureRow>[0],
+          voteCounts[f.id] ?? 0,
+          false
+        )
+      )
 
       const byStatus: Record<string, number> = {}
+      const byPriority: Record<string, number> = {}
       for (const f of enriched) {
         byStatus[f.status] = (byStatus[f.status] ?? 0) + 1
+        byPriority[f.priority] = (byPriority[f.priority] ?? 0) + 1
       }
 
       const overdueCount = enriched.filter((f) => {
@@ -62,6 +64,7 @@ export function useDashboardStats() {
       return {
         totalFeatures: enriched.length,
         byStatus,
+        byPriority,
         overdueCount,
         allFeatures: enriched,
         topVoted: [...enriched].sort((a, b) => b.vote_count - a.vote_count).slice(0, 5),

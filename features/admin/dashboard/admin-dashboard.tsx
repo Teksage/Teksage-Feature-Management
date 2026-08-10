@@ -7,6 +7,7 @@ import { StatsCard } from '@/components/shared/data-display/stats-card'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
 import { StatusBadge } from '@/components/shared/data-display/status-badge'
 import { UpcomingReleases } from '@/components/shared/data-display/upcoming-releases'
+import { DashboardCharts } from '@/features/shared/dashboard/dashboard-charts'
 import { formatDate } from '@/utils/format'
 import { useDashboardStats } from '@/services/dashboard/use-dashboard-stats'
 import { ROUTES } from '@/lib/constants'
@@ -28,6 +29,8 @@ export function AdminDashboard() {
         <StatsCard title="Ideas" value={stats.byStatus['Idea'] ?? 0} icon={Lightbulb} />
         <StatsCard title="Overdue" value={stats.overdueCount} icon={AlertTriangle} variant="destructive" />
       </div>
+
+      <DashboardCharts byStatus={stats.byStatus} byPriority={stats.byPriority} />
 
       <div className="grid gap-6 lg:grid-cols-2">
         <UpcomingReleases features={stats.allFeatures} basePath={ROUTES.admin.features} />

@@ -8,6 +8,7 @@ export const featureSchema = z.object({
   priority: z.enum(FEATURE_PRIORITIES),
   platform: z.enum(FEATURE_PLATFORMS),
   categoryId: z.string().uuid().optional().nullable().or(z.literal('')),
+  assigneeId: z.string().uuid().optional().nullable().or(z.literal('')),
   targetRelease: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, 'Pick a valid date')

@@ -34,6 +34,7 @@ export function useUpsertFeature() {
         priority: payload.priority,
         platform: payload.platform,
         category_id: payload.categoryId || null,
+        assignee_id: payload.assigneeId || null,
         target_release: payload.targetRelease || null,
       }
 

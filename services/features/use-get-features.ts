@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { QUERY_KEYS, STALE_TIME } from '@/lib/constants'
 import { useAuthStore } from '@/store/auth-store'
+import { FEATURE_SELECT, mapFeatureRow } from './map-feature'
 import type { IFeatureEntity, IFeatureFilters } from './features.types'
 
 export function useGetFeatures(filters?: IFeatureFilters) {
@@ -16,13 +17,14 @@ export function useGetFeatures(filters?: IFeatureFilters) {
 
       let query = supabase
         .from('features')
-        .select('*, feature_categories(name), profiles!created_by(full_name)')
+        .select(FEATURE_SELECT)
         .order('created_at', { ascending: false })
 
       if (filters?.status) query = query.eq('status', filters.status)
       if (filters?.priority) query = query.eq('priority', filters.priority)
       if (filters?.platform) query = query.eq('platform', filters.platform)
       if (filters?.categoryId) query = query.eq('category_id', filters.categoryId)
+      if (filters?.assigneeId) query = query.eq('assignee_id', filters.assigneeId)
       if (filters?.search) query = query.ilike('title', `%${filters.search}%`)
 
       const { data: rows, error } = await query
@@ -40,15 +42,13 @@ export function useGetFeatures(filters?: IFeatureFilters) {
         if (v.user_id === user?.id) userVoted.add(v.feature_id)
       }
 
-      return (rows ?? []).map((r) => ({
-        ...r,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        category_name: (r.feature_categories as any)?.name ?? null,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        creator_full_name: (r.profiles as any)?.full_name ?? null,
-        vote_count: voteCounts[r.id] ?? 0,
-        has_voted: userVoted.has(r.id),
-      }))
+      return (rows ?? []).map((r) =>
+        mapFeatureRow(
+          r as Parameters<typeof mapFeatureRow>[0],
+          voteCounts[r.id] ?? 0,
+          userVoted.has(r.id)
+        )
+      )
     },
     staleTime: STALE_TIME.short,
   })

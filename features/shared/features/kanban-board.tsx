@@ -40,6 +40,7 @@ const EMPTY_FILTERS: FeatureBoardFilterValues = {
   priority: undefined,
   platform: undefined,
   categoryId: undefined,
+  assigneeId: undefined,
 }
 
 function defaultPlatformForTab(tab: FeatureBoardTab): FeaturePlatform {
@@ -64,6 +65,7 @@ export function KanbanBoard({ basePath, canManageStatus }: KanbanBoardProps) {
     priority: filters.priority,
     platform: filters.platform,
     categoryId: filters.categoryId,
+    assigneeId: filters.assigneeId,
   })
 
   const upsert = useUpsertFeature()

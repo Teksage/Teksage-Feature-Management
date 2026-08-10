@@ -80,6 +80,9 @@ export const SUPABASE_WRITE_PROXY_PATH = '/api/supabase-write'
 /** Sentinel for "no category" — Select cannot use an empty string as a value. */
 export const NO_CATEGORY_VALUE = 'none'
 
+/** Sentinel for "unassigned" — Select cannot use an empty string as a value. */
+export const NO_ASSIGNEE_VALUE = 'none'
+
 export const AUTH_COPY = {
   loginTitle: 'Welcome back',
   loginSubtitle: 'Sign in to Teksage Feature Management',

@@ -59,6 +59,7 @@ export interface Database {
           web_status: FeatureStatus | null
           app_status: FeatureStatus | null
           category_id: string | null
+          assignee_id: string | null
           target_release: string | null
           created_by: string
           created_at: string
@@ -74,6 +75,7 @@ export interface Database {
           web_status?: FeatureStatus | null
           app_status?: FeatureStatus | null
           category_id?: string | null
+          assignee_id?: string | null
           target_release?: string | null
           created_by: string
           created_at?: string
@@ -88,6 +90,7 @@ export interface Database {
           web_status?: FeatureStatus | null
           app_status?: FeatureStatus | null
           category_id?: string | null
+          assignee_id?: string | null
           target_release?: string | null
           updated_at?: string
         }

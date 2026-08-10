@@ -10,8 +10,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
-import { StatusBadge } from '@/components/shared/data-display/status-badge'
-import { ReleaseCountdown } from '@/components/shared/data-display/release-countdown'
 import { cn } from '@/utils/cn'
 import { useToggleVote } from '@/services/votes/use-toggle-vote'
 import { KANBAN_DRAG_TYPE } from '@/lib/constants'
@@ -47,7 +45,6 @@ export function KanbanCard({
 
   function handleDragEnd() {
     setIsDragging(false)
-    // Delay reset so click after drop is ignored
     requestAnimationFrame(() => {
       dragged.current = false
     })
@@ -65,7 +62,7 @@ export function KanbanCard({
       onDragEnd={handleDragEnd}
       onClick={handleClick}
       className={cn(
-        'bg-card group relative flex flex-col gap-2.5 rounded-xl border p-3',
+        'bg-card group relative flex flex-col gap-2 rounded-xl border p-3',
         'shadow-card hover:shadow-dropdown hover:ring-primary/15 transition-all hover:ring-1',
         canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer',
         isDragging && 'opacity-40 ring-1 ring-primary'
@@ -81,28 +78,14 @@ export function KanbanCard({
         )}
       />
 
-      <div className="pl-1">
-        <p className="line-clamp-2 text-sm font-semibold leading-snug">{f.title}</p>
-        {f.description && (
-          <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">{f.description}</p>
-        )}
-      </div>
+      <p className="line-clamp-2 pl-1 text-sm font-semibold leading-snug">{f.title}</p>
 
-      <div className="flex items-center justify-between pl-1">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <StatusBadge status={f.priority} />
-          {f.category_name && (
-            <span className="text-muted-foreground rounded-full border px-2 py-0.5 text-[10px]">
-              {f.category_name}
-            </span>
-          )}
-          {f.platform === 'Both' && (
-            <span className="text-muted-foreground rounded-full border px-2 py-0.5 text-[10px]">Both</span>
-          )}
-          <ReleaseCountdown date={f.target_release} />
-        </div>
+      <div className="flex items-center justify-between gap-2 pl-1">
+        <span className="text-muted-foreground truncate text-[11px]">
+          {f.assignee_full_name ?? 'Unassigned'}
+        </span>
 
-        <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <Button
             variant="ghost"
             size="sm"

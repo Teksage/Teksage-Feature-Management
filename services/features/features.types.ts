@@ -15,6 +15,7 @@ export interface IFeatureEntity {
   web_status: FeatureStatus | null
   app_status: FeatureStatus | null
   category_id: string | null
+  assignee_id: string | null
   target_release: string | null
   created_by: string
   created_at: string
@@ -23,6 +24,7 @@ export interface IFeatureEntity {
   has_voted: boolean
   category_name: string | null
   creator_full_name: string | null
+  assignee_full_name: string | null
 }
 
 export interface IFeatureFilters {
@@ -30,6 +32,7 @@ export interface IFeatureFilters {
   priority?: FeaturePriority
   platform?: FeaturePlatform
   categoryId?: string
+  assigneeId?: string
   search?: string
 }
 

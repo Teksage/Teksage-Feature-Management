@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo } from 'react'
 import { X } from 'lucide-react'
 import { SearchBar } from '@/components/shared/forms/search-bar'
 import { Button } from '@/components/ui/button'
@@ -11,6 +12,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useGetCategories } from '@/services/categories/use-get-categories'
+import { useGetTeam } from '@/services/team/use-get-team'
 import { FEATURE_PLATFORMS, FEATURE_PRIORITIES } from '@/lib/constants'
 import type { FeaturePlatform, FeaturePriority } from '@/types/supabase.types'
 
@@ -21,6 +23,7 @@ export interface FeatureBoardFilterValues {
   priority: FeaturePriority | undefined
   platform: FeaturePlatform | undefined
   categoryId: string | undefined
+  assigneeId: string | undefined
 }
 
 interface FeatureBoardFiltersProps {
@@ -30,8 +33,28 @@ interface FeatureBoardFiltersProps {
 
 export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersProps) {
   const { data: categories = [] } = useGetCategories()
+  const { data: members = [] } = useGetTeam()
   const hasActive =
-    !!values.search || !!values.priority || !!values.platform || !!values.categoryId
+    !!values.search ||
+    !!values.priority ||
+    !!values.platform ||
+    !!values.categoryId ||
+    !!values.assigneeId
+
+  const categoryItems = useMemo(
+    () => ({
+      [ALL]: 'All categories',
+      ...Object.fromEntries(categories.map((c) => [c.id, c.name])),
+    }),
+    [categories]
+  )
+  const assigneeItems = useMemo(
+    () => ({
+      [ALL]: 'All owners',
+      ...Object.fromEntries(members.map((m) => [m.id, m.full_name])),
+    }),
+    [members]
+  )
 
   function patch(partial: Partial<FeatureBoardFilterValues>) {
     onChange({ ...values, ...partial })
@@ -85,6 +108,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
       </Select>
 
       <Select
+        items={categoryItems}
         value={values.categoryId ?? ALL}
         onValueChange={(v) => patch({ categoryId: !v || v === ALL ? undefined : v })}
       >
@@ -96,6 +120,24 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
           {categories.map((c) => (
             <SelectItem key={c.id} value={c.id}>
               {c.name}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      <Select
+        items={assigneeItems}
+        value={values.assigneeId ?? ALL}
+        onValueChange={(v) => patch({ assigneeId: !v || v === ALL ? undefined : v })}
+      >
+        <SelectTrigger className="h-9 w-[140px]" size="sm">
+          <SelectValue placeholder="Owner" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={ALL}>All owners</SelectItem>
+          {members.map((m) => (
+            <SelectItem key={m.id} value={m.id}>
+              {m.full_name}
             </SelectItem>
           ))}
         </SelectContent>
@@ -113,6 +155,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
               priority: undefined,
               platform: undefined,
               categoryId: undefined,
+              assigneeId: undefined,
             })
           }
         >

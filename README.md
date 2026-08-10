@@ -9,6 +9,8 @@ Built with **Next.js 16**, **Supabase**, **TanStack Query**, and **shadcn/ui** �
 - Auth (email/password) with **Admin** and **Member** roles
 - Kanban board with drag-and-drop status pipeline: Idea → Planned → In Progress → Completed
 - Priority, categories (set when creating a feature), voting, and comments
+- Feature owners (assign a teammate) with board filter
+- Dashboard charts for pipeline status and priority mix
 - Admin team management
 - Role-based dashboards with stats and top-voted ideas
 
@@ -24,9 +26,16 @@ cp .env.example .env.local
 ### 2. Supabase
 
 1. Create a Supabase project and fill `.env.local` from `.env.example`
-2. Apply schema SQL from `supabase/migrations/` in the Supabase SQL Editor (or via CLI locally)
-3. If you already had **Shipped** / **Archived** statuses, also run `scripts/rename-feature-statuses.sql`
-4. Promote your first user to Admin after signup:
+2. Link the CLI and apply local migrations (gitignored under `supabase/migrations/`):
+
+```bash
+npx supabase login
+npx supabase link --project-ref your-project-ref
+npx supabase db push
+```
+
+Or paste migration SQL into the Supabase SQL Editor in timestamp order.
+3. Promote your first user to Admin after signup:
 
 ```sql
 update public.profiles set role = 'Admin' where email = 'you@teksage.com';
@@ -59,8 +68,7 @@ features/            # domain UI (auth, admin, member, shared features)
 services/            # TanStack Query hooks
 lib/                 # constants, validations, supabase clients
 types/               # TypeScript types
-supabase/            # local migrations (gitignored) + config
-scripts/             # one-off SQL helpers
+supabase/            # config + local migrations (gitignored)
 proxy.ts             # Auth + RBAC (Next.js 16)
 ```
 

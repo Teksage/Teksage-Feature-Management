@@ -20,9 +20,11 @@ import { PageLoader } from '@/components/shared/feedback/page-loader'
 import { FeatureVoteButton } from './feature-vote-button'
 import { FeatureComments } from './feature-comments'
 import { FeatureForm } from './feature-form'
+import { FeatureAssigneeField } from './feature-assignee-field'
 import { useGetFeature } from '@/services/features'
 import { useUpsertFeature } from '@/services/features'
 import { useDeleteFeature } from '@/services/features'
+import { useGetTeam } from '@/services/team/use-get-team'
 import { FEATURE_STATUSES, FEATURE_PRIORITIES } from '@/lib/constants'
 import type { FeatureInput } from '@/lib/validations/feature'
 import type { FeatureStatus, FeaturePriority } from '@/types/supabase.types'
@@ -36,6 +38,7 @@ interface FeatureDetailProps {
 export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureDetailProps) {
   const router = useRouter()
   const { data: feature, isLoading } = useGetFeature(featureId)
+  const { data: members = [] } = useGetTeam()
   const upsert = useUpsertFeature()
   const deleteFeature = useDeleteFeature()
   const [editOpen, setEditOpen] = useState(false)
@@ -51,6 +54,7 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
       priority: feature!.priority,
       platform: feature!.platform,
       categoryId: feature!.category_id ?? '',
+      assigneeId: feature!.assignee_id ?? '',
       targetRelease: feature!.target_release ?? '',
       ...overrides,
       id: featureId,
@@ -64,12 +68,29 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
 
   async function handleStatusChange(value: FeatureStatus | null) {
     if (!feature || !value) return
-    await upsert.mutateAsync(toPayload({ status: value }))
+    try {
+      await upsert.mutateAsync(toPayload({ status: value }))
+    } catch {
+      /* toast via mutation onError */
+    }
   }
 
   async function handlePriorityChange(value: FeaturePriority | null) {
     if (!feature || !value) return
-    await upsert.mutateAsync(toPayload({ priority: value }))
+    try {
+      await upsert.mutateAsync(toPayload({ priority: value }))
+    } catch {
+      /* toast via mutation onError */
+    }
+  }
+
+  async function handleAssigneeChange(assigneeId: string) {
+    if (!feature) return
+    try {
+      await upsert.mutateAsync(toPayload({ assigneeId }))
+    } catch {
+      /* toast via mutation onError */
+    }
   }
 
   if (isLoading) return <PageLoader />
@@ -117,6 +138,24 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
           </span>
           <ReleaseCountdown date={feature.target_release} showDate />
         </div>
+
+        {canManageStatus ? (
+          <div className="max-w-xs">
+            <FeatureAssigneeField
+              members={members}
+              assigneeId={feature.assignee_id ?? ''}
+              onChange={handleAssigneeChange}
+              triggerClassName="h-8 w-full text-xs"
+            />
+          </div>
+        ) : (
+          <p className="text-muted-foreground text-sm">
+            Owner:{' '}
+            <span className="text-foreground font-medium">
+              {feature.assignee_full_name ?? 'Unassigned'}
+            </span>
+          </p>
+        )}
 
         {feature.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{feature.description}</p>}
 

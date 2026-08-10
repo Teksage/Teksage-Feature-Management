@@ -46,10 +46,13 @@ next-env.d.ts
 .vscode/
 .idea/
 
-# supabase — apply SQL via dashboard or CLI locally; keep out of commits
+# supabase — local-only; keep out of commits
 /supabase/migrations/
 /supabase/.temp/
 /supabase/.branches/
+
+# one-off local SQL / scratch
+/scripts/
 
 # husky generated internals
 .husky/_/

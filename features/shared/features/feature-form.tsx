@@ -7,20 +7,15 @@ import { Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { FormFieldWrapper } from '@/components/shared/forms/form-field-wrapper'
 import { FeatureCategoryField } from './feature-category-field'
+import { FeatureAssigneeField } from './feature-assignee-field'
+import { FeatureFormMetaFields } from './feature-form-meta-fields'
 import { DatePicker } from '@/components/shared/forms/date-picker'
 import { featureSchema, type FeatureInput } from '@/lib/validations/feature'
-import { FEATURE_STATUSES, FEATURE_PRIORITIES, FEATURE_PLATFORMS } from '@/lib/constants'
 import { useGetCategories } from '@/services/categories/use-get-categories'
 import { useUpsertCategory } from '@/services/categories/use-upsert-category'
+import { useGetTeam } from '@/services/team/use-get-team'
 import type { IFeatureEntity } from '@/services/features/features.types'
 
 interface FeatureFormProps {
@@ -40,6 +35,7 @@ export function FeatureForm({
   onSubmit,
 }: FeatureFormProps) {
   const { data: categories = [] } = useGetCategories()
+  const { data: members = [] } = useGetTeam()
   const upsertCategory = useUpsertCategory()
   const [newCategory, setNewCategory] = useState('')
   const [busy, setBusy] = useState(false)
@@ -59,18 +55,15 @@ export function FeatureForm({
       priority: defaultValues?.priority ?? 'Medium',
       platform: defaultValues?.platform ?? 'Both',
       categoryId: defaultValues?.category_id ?? '',
+      assigneeId: defaultValues?.assignee_id ?? '',
       targetRelease: defaultValues?.target_release ?? '',
     },
   })
 
   useEffect(() => {
     if (defaultValues?.category_id) setValue('categoryId', defaultValues.category_id)
-  }, [defaultValues?.category_id, setValue])
-
-  const status = watch('status')
-  const priority = watch('priority')
-  const platform = watch('platform')
-  const categoryId = watch('categoryId')
+    if (defaultValues?.assignee_id) setValue('assigneeId', defaultValues.assignee_id)
+  }, [defaultValues?.category_id, defaultValues?.assignee_id, setValue])
 
   async function handleFormSubmit(data: FeatureInput) {
     setBusy(true)
@@ -104,73 +97,18 @@ export function FeatureForm({
         />
       </FormFieldWrapper>
 
-      <FormFieldWrapper label="Platform" error={errors.platform} required>
-        <Select
-          value={platform}
-          onValueChange={(v) => {
-            if (v) setValue('platform', v as FeatureInput['platform'])
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {FEATURE_PLATFORMS.map((p) => (
-              <SelectItem key={p} value={p}>
-                {p === 'Website' ? 'Website' : p === 'App' ? 'App' : 'Both (Web + App)'}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </FormFieldWrapper>
-
-      <div className="grid grid-cols-2 gap-3">
-        {canManageStatus && (
-          <FormFieldWrapper label="Status" error={errors.status} required>
-            <Select
-              value={status}
-              onValueChange={(v) => {
-                if (v) setValue('status', v as FeatureInput['status'])
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {FEATURE_STATUSES.map((s) => (
-                  <SelectItem key={s} value={s}>
-                    {s}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </FormFieldWrapper>
-        )}
-
-        <FormFieldWrapper label="Priority" error={errors.priority} required>
-          <Select
-            value={priority}
-            onValueChange={(v) => {
-              if (v) setValue('priority', v as FeatureInput['priority'])
-            }}
-          >
-            <SelectTrigger className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {FEATURE_PRIORITIES.map((p) => (
-                <SelectItem key={p} value={p}>
-                  {p}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </FormFieldWrapper>
-      </div>
+      <FeatureFormMetaFields
+        platform={watch('platform')}
+        status={watch('status')}
+        priority={watch('priority')}
+        canManageStatus={canManageStatus}
+        errors={errors}
+        setValue={setValue}
+      />
 
       <FeatureCategoryField
         categories={categories}
-        categoryId={categoryId ?? ''}
+        categoryId={watch('categoryId') ?? ''}
         newCategory={newCategory}
         error={errors.categoryId}
         canCreate={canManageStatus}
@@ -182,6 +120,13 @@ export function FeatureForm({
           setNewCategory(name)
           if (name.trim()) setValue('categoryId', '')
         }}
+      />
+
+      <FeatureAssigneeField
+        members={members}
+        assigneeId={watch('assigneeId') ?? ''}
+        error={errors.assigneeId}
+        onChange={(id) => setValue('assigneeId', id)}
       />
 
       <FormFieldWrapper label="Target Release" error={errors.targetRelease}>
