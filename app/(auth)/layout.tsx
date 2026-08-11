@@ -1,7 +1,14 @@
 import type { Metadata } from 'next'
+import { Outfit } from 'next/font/google'
 import { AppLogo } from '@/components/shared/layout/app-logo'
-import { FeatureCard } from '@/components/shared/data-display/feature-card'
+import { AuthHero } from '@/features/auth/components/auth-hero'
 import { APP_DESCRIPTION } from '@/lib/constants'
+
+const outfit = Outfit({
+  subsets: ['latin'],
+  variable: '--font-auth-heading',
+  display: 'swap',
+})
 
 export const metadata: Metadata = {
   title: 'Sign In',
@@ -9,34 +16,26 @@ export const metadata: Metadata = {
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="page-mesh flex min-h-screen">
-      <aside className="from-primary/10 via-brand-secondary/5 relative hidden w-[42%] flex-col justify-between overflow-hidden border-r bg-gradient-to-br to-transparent p-10 lg:flex">
-        <div
-          className="from-primary/20 pointer-events-none absolute -top-24 -left-24 h-72 w-72 rounded-full bg-gradient-to-br to-transparent blur-3xl"
-          aria-hidden
-        />
-        <div
-          className="from-brand-secondary/20 pointer-events-none absolute right-0 bottom-0 h-64 w-64 rounded-full bg-gradient-to-tl to-transparent blur-3xl"
-          aria-hidden
-        />
-        <AppLogo size="lg" className="relative h-14 w-auto" priority />
-        <div className="relative space-y-4">
-          <h2 className="text-3xl font-bold tracking-tight">Ship ideas with clarity</h2>
-          <p className="text-muted-foreground max-w-sm text-base leading-relaxed">
-            {APP_DESCRIPTION}. Plan features, assign owners, and track delivery in one place.
-          </p>
-        </div>
-        <p className="text-muted-foreground relative text-xs">© Teksage</p>
-      </aside>
+    <div className={`${outfit.variable} page-mesh flex min-h-screen`}>
+      <AuthHero />
 
-      <div className="flex flex-1 flex-col items-center justify-center p-6 sm:p-10">
-        <div className="mb-8 flex flex-col items-center gap-2 lg:hidden">
-          <AppLogo size="lg" className="h-14 w-auto" priority />
-          <p className="text-muted-foreground text-center text-sm">{APP_DESCRIPTION}</p>
+      <div className="relative flex flex-1 flex-col items-center justify-center px-5 py-10 sm:px-10">
+        <div
+          className="from-primary/8 pointer-events-none absolute inset-0 bg-gradient-to-bl via-transparent to-brand-secondary/10"
+          aria-hidden
+        />
+
+        <div className="auth-form-enter relative z-10 mb-8 flex flex-col items-center gap-3 lg:hidden">
+          <AppLogo size="lg" className="h-12 w-auto" priority />
+          <p className="text-muted-foreground max-w-xs text-center text-sm">{APP_DESCRIPTION}</p>
         </div>
-        <FeatureCard className="w-full max-w-md shadow-dropdown" contentClassName="space-y-5 p-1">
-          {children}
-        </FeatureCard>
+
+        <div className="auth-form-enter relative z-10 w-full max-w-[420px]">
+          <div className="glass-panel border-border/70 ring-primary/10 overflow-hidden rounded-2xl border p-6 shadow-modal ring-1 sm:p-8">
+            <div className="from-primary via-primary to-brand-secondary mb-6 h-1 w-full rounded-full bg-gradient-to-r" />
+            <div className="space-y-6">{children}</div>
+          </div>
+        </div>
       </div>
     </div>
   )

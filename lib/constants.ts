@@ -93,9 +93,9 @@ export const NO_ASSIGNEE_VALUE = 'none'
 
 export const AUTH_COPY = {
   loginTitle: 'Welcome back',
-  loginSubtitle: 'Sign in to Teksage Feature Management',
+  loginSubtitle: 'Sign in to continue managing the Teksage roadmap.',
   registerTitle: 'Create account',
-  registerSubtitle: 'Join the Teksage product team',
+  registerSubtitle: 'Join the Teksage product team and start shipping ideas.',
   forgotTitle: 'Forgot password?',
   forgotSubtitle: "Enter your email and we'll send you a reset link.",
   resetTitle: 'Set new password',

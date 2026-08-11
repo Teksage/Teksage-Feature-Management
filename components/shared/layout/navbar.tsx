@@ -1,7 +1,7 @@
 'use client'
 
 import { Moon, Sun, Menu } from 'lucide-react'
-import { useTheme } from 'next-themes'
+import { useTheme } from '@/components/theme-provider'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -23,7 +23,7 @@ export function Navbar() {
   const { user } = useAuthStore()
   const { setSidebarMobileOpen } = useUIStore()
   const { signOut } = useAuth()
-  const { theme, setTheme } = useTheme()
+  const { resolvedTheme, setTheme } = useTheme()
 
   return (
     <header className="glass-panel sticky top-0 z-40 flex h-14 items-center justify-between border-b px-4 shadow-sm">
@@ -45,7 +45,7 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
         >
           <Sun className="h-4 w-4 scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
           <Moon className="absolute h-4 w-4 scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />

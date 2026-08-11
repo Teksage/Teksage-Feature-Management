@@ -33,8 +33,8 @@ interface FeatureBoardFiltersProps {
 
 function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="space-y-1.5">
-      <label className="text-muted-foreground text-xs font-medium">{label}</label>
+    <div className="space-y-1">
+      <label className="text-muted-foreground text-[11px] font-medium">{label}</label>
       {children}
     </div>
   )
@@ -86,11 +86,11 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-2.5">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <Filter className="text-muted-foreground h-4 w-4" />
-          <span className="text-sm font-semibold">Filters</span>
+          <Filter className="text-muted-foreground h-3.5 w-3.5" />
+          <span className="text-xs font-semibold tracking-wide uppercase">Filters</span>
         </div>
         {hasActive && (
           <Button
@@ -123,7 +123,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
         />
       </FilterField>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-2.5 sm:grid-cols-2 xl:grid-cols-4">
         <FilterField label="Priority">
           <Select
             items={priorityItems}
@@ -132,7 +132,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
               patch({ priority: !v || v === ALL ? undefined : (v as FeaturePriority) })
             }
           >
-            <SelectTrigger className="h-10 w-full">
+            <SelectTrigger className="h-9 w-full">
               <SelectValue placeholder="All priorities" />
             </SelectTrigger>
             <SelectContent>
@@ -154,7 +154,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
               patch({ platform: !v || v === ALL ? undefined : (v as FeaturePlatform) })
             }
           >
-            <SelectTrigger className="h-10 w-full">
+            <SelectTrigger className="h-9 w-full">
               <SelectValue placeholder="All platforms" />
             </SelectTrigger>
             <SelectContent>
@@ -174,7 +174,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
             value={values.categoryId ?? ALL}
             onValueChange={(v) => patch({ categoryId: !v || v === ALL ? undefined : v })}
           >
-            <SelectTrigger className="h-10 w-full">
+            <SelectTrigger className="h-9 w-full">
               <SelectValue placeholder="All categories" />
             </SelectTrigger>
             <SelectContent>
@@ -194,7 +194,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
             value={values.assigneeId ?? ALL}
             onValueChange={(v) => patch({ assigneeId: !v || v === ALL ? undefined : v })}
           >
-            <SelectTrigger className="h-10 w-full">
+            <SelectTrigger className="h-9 w-full">
               <SelectValue placeholder="All owners" />
             </SelectTrigger>
             <SelectContent>

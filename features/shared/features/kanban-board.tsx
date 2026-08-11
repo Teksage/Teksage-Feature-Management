@@ -81,8 +81,9 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
   if (isLoading) return <PageLoader />
 
   return (
-    <div className="flex h-full flex-col gap-5">
+    <div className="flex flex-col gap-3 pb-6">
       <PageHeader
+        dense
         icon={Kanban}
         title="Features"
         description="Track Web and App delivery on separate boards. Drag cards to update status."
@@ -128,7 +129,7 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
         onValueChange={(v) => {
           if (v === 'Web' || v === 'App') setTab(v)
         }}
-        className="flex min-h-0 flex-1 flex-col gap-4"
+        className="flex flex-col gap-3"
       >
         <TabsList>
           {FEATURE_BOARD_TABS.map((t) => (
@@ -143,27 +144,29 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
         </TabsList>
 
         {FEATURE_BOARD_TABS.map((t) => (
-          <TabsContent key={t.id} value={t.id} className="min-h-0 flex-1 overflow-auto pb-4">
+          <TabsContent key={t.id} value={t.id} className="mt-0 outline-none">
             {tab === t.id &&
               (view === 'list' ? (
                 <FeatureListView features={tabFeatures} basePath={basePath} />
               ) : (
-                <KanbanBoardColumns
-                  tab={tab}
-                  features={tabFeatures}
-                  basePath={basePath}
-                  onAdd={(status) => {
-                    setCreateStatus(status)
-                    setCreateOpen(true)
-                  }}
-                  onEdit={setEditFeature}
-                  onDelete={setDeleteId}
-                  onDropFeature={(featureId, status) => {
-                    const f = allFeatures.find((x) => x.id === featureId)
-                    if (!f || statusForTab(f, tab) === status) return
-                    moveFeature.mutate({ id: featureId, status, tab })
-                  }}
-                />
+                <div className="overflow-x-auto pb-2">
+                  <KanbanBoardColumns
+                    tab={tab}
+                    features={tabFeatures}
+                    basePath={basePath}
+                    onAdd={(status) => {
+                      setCreateStatus(status)
+                      setCreateOpen(true)
+                    }}
+                    onEdit={setEditFeature}
+                    onDelete={setDeleteId}
+                    onDropFeature={(featureId, status) => {
+                      const f = allFeatures.find((x) => x.id === featureId)
+                      if (!f || statusForTab(f, tab) === status) return
+                      moveFeature.mutate({ id: featureId, status, tab })
+                    }}
+                  />
+                </div>
               ))}
           </TabsContent>
         ))}

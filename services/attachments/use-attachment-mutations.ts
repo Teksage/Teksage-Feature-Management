@@ -21,6 +21,7 @@ import {
   removeAttachmentItem,
   upsertAttachmentItem,
 } from './attachment-server'
+import { uploadAttachmentFile } from './upload-file'
 
 function linkKey(featureId: string, url: string) {
   return `link:${featureId}:${url.trim().toLowerCase()}`
@@ -94,10 +95,7 @@ export function useUploadAttachment(featureId: string) {
 
       return runOnce(fileKey(featureId, file), async () => {
         const supabase = getSupabaseBrowserClient()
-        const { error: uploadError } = await supabase.storage
-          .from(BUCKET)
-          .upload(storagePath, file, { upsert: false })
-        if (uploadError) throw uploadError
+        await uploadAttachmentFile(file, storagePath)
 
         const newItem: AttachmentItem = {
           kind: 'file',
@@ -130,7 +128,13 @@ export function useUploadAttachment(featureId: string) {
     },
     onError: (err, _vars, ctx) => {
       rollbackAttachments(queryClient, featureId, ctx?.snapshot)
-      toast.error(err instanceof Error ? err.message : 'Failed to upload file')
+      const message =
+        err instanceof Error
+          ? /failed to fetch/i.test(err.message)
+            ? 'Upload blocked by the network. Redeploy after setting Supabase env vars on Vercel.'
+            : err.message
+          : 'Failed to upload file'
+      toast.error(message)
     },
     onSuccess: () => toast.success('File uploaded.'),
     onSettled: () => syncAttachments(queryClient, featureId),

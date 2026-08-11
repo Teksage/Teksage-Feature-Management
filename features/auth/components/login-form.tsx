@@ -50,13 +50,14 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <FormFieldWrapper label="Email" htmlFor="email" error={errors.email} required>
         <Input
           id="email"
           type="email"
           placeholder="you@teksage.com"
           autoComplete="email"
+          className="bg-background/80 h-11"
           {...register('email')}
         />
       </FormFieldWrapper>
@@ -67,27 +68,28 @@ export function LoginForm() {
           type="password"
           placeholder="••••••••"
           autoComplete="current-password"
+          className="bg-background/80 h-11"
           {...register('password')}
         />
       </FormFieldWrapper>
 
-      <div className="flex justify-end">
+      <div className="-mt-1 flex justify-end">
         <Link
           href={ROUTES.forgotPassword}
-          className="text-muted-foreground hover:text-primary text-xs"
+          className="text-muted-foreground hover:text-primary text-xs font-medium transition-colors"
         >
           Forgot password?
         </Link>
       </div>
 
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
+      <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
         Sign In
       </Button>
 
-      <p className="text-muted-foreground text-center text-sm">
+      <p className="text-muted-foreground pt-1 text-center text-sm">
         {"Don't have an account? "}
-        <Link href={ROUTES.register} className="text-primary font-medium hover:underline">
+        <Link href={ROUTES.register} className="text-primary font-semibold hover:underline">
           Register
         </Link>
       </p>

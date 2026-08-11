@@ -17,84 +17,97 @@ export interface IActivityItem {
   actor_full_name: string | null
 }
 
+type ProfileRef = { full_name: string } | null
+
+/** Soft-fail a source so one broken table cannot blank the whole timeline. */
+async function safeQuery<T>(promise: PromiseLike<{ data: T; error: { message: string } | null }>): Promise<T | null> {
+  try {
+    const { data, error } = await promise
+    if (error) {
+      console.warn('[activity]', error.message)
+      return null
+    }
+    return data
+  } catch (err) {
+    console.warn('[activity]', err)
+    return null
+  }
+}
+
 export function useGetActivity(featureId: string) {
   return useQuery({
     queryKey: [QUERY_KEYS.activity, featureId],
     queryFn: async (): Promise<IActivityItem[]> => {
       const supabase = getSupabaseBrowserClient()
 
-      const [featureRes, commentsRes, subtasksRes, attachmentsRes, docRes] = await Promise.all([
-        supabase
-          .from('features')
-          .select('created_at, created_by, creator:profiles!created_by(full_name)')
-          .eq('id', featureId)
-          .maybeSingle(),
-        supabase
-          .from('feature_comments')
-          .select('id, user_id, body, created_at, profiles(full_name)')
-          .eq('feature_id', featureId),
-        supabase
-          .from('feature_subtasks')
-          .select(
-            'id, title, status, created_by, created_at, updated_at, creator:profiles!created_by(full_name)'
-          )
-          .eq('feature_id', featureId),
-        supabase
-          .from('feature_attachments')
-          .select('id, items, uploaded_by, created_at, uploader:profiles!uploaded_by(full_name)')
-          .eq('feature_id', featureId),
-        supabase
-          .from('feature_docs')
-          .select('body, updated_at, updated_by, updater:profiles!updated_by(full_name)')
-          .eq('feature_id', featureId)
-          .maybeSingle(),
+      const [feature, comments, subtasks, attachments, doc] = await Promise.all([
+        safeQuery(
+          supabase
+            .from('features')
+            .select('created_at, created_by, creator:profiles!created_by(full_name)')
+            .eq('id', featureId)
+            .maybeSingle()
+        ),
+        safeQuery(
+          supabase
+            .from('feature_comments')
+            .select('id, user_id, body, created_at, profiles(full_name)')
+            .eq('feature_id', featureId)
+        ),
+        safeQuery(
+          supabase
+            .from('feature_subtasks')
+            .select(
+              'id, title, status, created_by, created_at, updated_at, creator:profiles!created_by(full_name)'
+            )
+            .eq('feature_id', featureId)
+        ),
+        safeQuery(
+          supabase
+            .from('feature_attachments')
+            .select('id, items, uploaded_by, created_at, uploader:profiles!uploaded_by(full_name)')
+            .eq('feature_id', featureId)
+        ),
+        safeQuery(
+          supabase
+            .from('feature_docs')
+            .select('body, updated_at, updated_by, updater:profiles!updated_by(full_name)')
+            .eq('feature_id', featureId)
+            .maybeSingle()
+        ),
       ])
-
-      if (featureRes.error) throw featureRes.error
-      if (commentsRes.error) throw commentsRes.error
-      if (subtasksRes.error) throw subtasksRes.error
-      if (attachmentsRes.error) throw attachmentsRes.error
-      if (docRes.error) throw docRes.error
-
-      const feature = featureRes.data
-        ? {
-            created_at: featureRes.data.created_at,
-            created_by: featureRes.data.created_by,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            creator: (featureRes.data.creator as any) ?? null,
-          }
-        : null
 
       return buildDerivedActivity(
         featureId,
-        feature,
-        (commentsRes.data ?? []).map((c) => ({
+        feature
+          ? {
+              created_at: feature.created_at,
+              created_by: feature.created_by,
+              creator: (feature.creator as ProfileRef) ?? null,
+            }
+          : null,
+        (comments ?? []).map((c) => ({
           ...c,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          profiles: (c.profiles as any) ?? null,
+          profiles: (c.profiles as ProfileRef) ?? null,
         })),
-        (subtasksRes.data ?? []).map((s) => ({
+        (subtasks ?? []).map((s) => ({
           ...s,
           status: s.status ?? 'Idea',
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          creator: (s.creator as any) ?? null,
+          creator: (s.creator as ProfileRef) ?? null,
         })),
-        (attachmentsRes.data ?? []).map((a) => ({
+        (attachments ?? []).map((a) => ({
           id: a.id,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          items: (a.items as any[]) ?? [],
+          items: (a.items as Array<{ kind: string; label: string }>) ?? [],
           uploaded_by: a.uploaded_by,
           created_at: a.created_at,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          uploader: (a.uploader as any) ?? null,
+          uploader: (a.uploader as ProfileRef) ?? null,
         })),
-        docRes.data
+        doc
           ? {
-              body: docRes.data.body,
-              updated_at: docRes.data.updated_at,
-              updated_by: docRes.data.updated_by,
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              updater: (docRes.data.updater as any) ?? null,
+              body: doc.body,
+              updated_at: doc.updated_at,
+              updated_by: doc.updated_by,
+              updater: (doc.updater as ProfileRef) ?? null,
             }
           : null
       ).slice(0, 100)

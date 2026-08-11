@@ -66,7 +66,7 @@ export function KanbanColumn({
   return (
     <div
       className={cn(
-        'flex w-72 shrink-0 flex-col gap-3 rounded-xl p-2 transition-colors lg:w-64 xl:w-72',
+        'flex w-72 shrink-0 flex-col gap-2.5 rounded-xl p-2 pb-4 transition-colors lg:w-64 xl:w-72',
         accent.column,
         isOver && accent.dropTarget
       )}
@@ -90,7 +90,7 @@ export function KanbanColumn({
         </Badge>
       </div>
 
-      <div className="flex min-h-16 flex-col gap-2">
+      <div className="flex min-h-16 flex-1 flex-col gap-2">
         {features.map((f) => (
           <KanbanCard
             key={f.id}
@@ -105,7 +105,7 @@ export function KanbanColumn({
       <Button
         variant="ghost"
         size="sm"
-        className="text-muted-foreground hover:text-foreground justify-start gap-1.5 rounded-xl border border-dashed"
+        className="text-muted-foreground hover:text-foreground mt-auto justify-start gap-1.5 rounded-xl border border-dashed"
         onClick={() => onAdd(status)}
       >
         <Plus className="h-3.5 w-3.5" />

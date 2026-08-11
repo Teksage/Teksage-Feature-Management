@@ -52,14 +52,35 @@ function formatAction(
 }
 
 export function FeatureActivity({ featureId }: FeatureActivityProps) {
-  const { data: items = [], isLoading } = useGetActivity(featureId)
+  const { data: items = [], isLoading, isError, error, refetch } = useGetActivity(featureId)
 
   if (isLoading) return <PageLoader />
 
+  if (isError) {
+    return (
+      <FeatureDetailPanel header={<h3 className="text-sm font-semibold">Activity</h3>}>
+        <FeatureDetailContent size="md">
+          <EmptyState
+            icon={History}
+            title="Couldn't load activity"
+            description={error instanceof Error ? error.message : 'Please try again.'}
+          />
+          <div className="flex justify-center pb-4">
+            <button
+              type="button"
+              className="text-primary text-sm font-medium hover:underline"
+              onClick={() => void refetch()}
+            >
+              Retry
+            </button>
+          </div>
+        </FeatureDetailContent>
+      </FeatureDetailPanel>
+    )
+  }
+
   return (
-    <FeatureDetailPanel
-      header={<h3 className="text-sm font-semibold">Activity</h3>}
-    >
+    <FeatureDetailPanel header={<h3 className="text-sm font-semibold">Activity</h3>}>
       {items.length === 0 ? (
         <FeatureDetailContent size="md">
           <EmptyState
