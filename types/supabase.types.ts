@@ -1,4 +1,12 @@
 export type UserRole = 'Admin' | 'Member'
+
+export interface AttachmentItem {
+  kind: 'file' | 'link'
+  label: string
+  url?: string | null
+  storage_path?: string | null
+  mime_type?: string | null
+}
 export type FeatureStatus = 'Idea' | 'Planned' | 'In Progress' | 'Completed'
 export type SubtaskStatus = 'Idea' | 'In Progress' | 'Completed'
 export type FeaturePriority = 'Low' | 'Medium' | 'High' | 'Critical'
@@ -166,28 +174,20 @@ export interface Database {
         Row: {
           id: string
           feature_id: string
-          kind: 'file' | 'link'
-          label: string
-          url: string | null
-          storage_path: string | null
-          mime_type: string | null
+          /** JSON array of AttachmentItem objects */
+          items: AttachmentItem[]
           uploaded_by: string
           created_at: string
         }
         Insert: {
           id?: string
           feature_id: string
-          kind: 'file' | 'link'
-          label: string
-          url?: string | null
-          storage_path?: string | null
-          mime_type?: string | null
+          items: AttachmentItem[]
           uploaded_by: string
           created_at?: string
         }
         Update: {
-          label?: string
-          url?: string | null
+          items?: AttachmentItem[]
         }
       }
       feature_docs: {

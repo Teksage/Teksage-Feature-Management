@@ -41,7 +41,7 @@ export function useGetActivity(featureId: string) {
           .eq('feature_id', featureId),
         supabase
           .from('feature_attachments')
-          .select('id, kind, label, uploaded_by, created_at, uploader:profiles!uploaded_by(full_name)')
+          .select('id, items, uploaded_by, created_at, uploader:profiles!uploaded_by(full_name)')
           .eq('feature_id', featureId),
         supabase
           .from('feature_docs')
@@ -80,7 +80,11 @@ export function useGetActivity(featureId: string) {
           creator: (s.creator as any) ?? null,
         })),
         (attachmentsRes.data ?? []).map((a) => ({
-          ...a,
+          id: a.id,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          items: (a.items as any[]) ?? [],
+          uploaded_by: a.uploaded_by,
+          created_at: a.created_at,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           uploader: (a.uploader as any) ?? null,
         })),

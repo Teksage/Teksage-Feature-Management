@@ -5,19 +5,18 @@ import { FileUp, Paperclip } from 'lucide-react'
 import { EmptyState } from '@/components/shared/feedback/empty-state'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
 import { toast } from 'sonner'
-import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useGetAttachments } from '@/services/attachments/use-get-attachments'
 import {
   useAddAttachmentLink,
   useUploadAttachment,
-  useDeleteAttachment,
+  useRemoveAttachmentItem,
 } from '@/services/attachments/use-attachment-mutations'
 import { FeatureDetailPanel } from './feature-detail-panel'
 import { FeatureDetailContent } from './feature-detail-content'
 import { AttachmentLinkForm } from './attachment-link-form'
 import { AttachmentList } from './attachment-list'
 import { AttachmentUploadDialog } from './attachment-upload-dialog'
-import type { IAttachment } from '@/services/attachments/use-get-attachments'
+import type { AttachmentItem } from '@/types/supabase.types'
 
 interface FeatureAttachmentsProps {
   featureId: string
@@ -25,29 +24,12 @@ interface FeatureAttachmentsProps {
 }
 
 export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsProps) {
-  const { data: items = [], isLoading } = useGetAttachments(featureId)
+  const { data: rows = [], isLoading } = useGetAttachments(featureId)
   const addLink = useAddAttachmentLink(featureId)
   const upload = useUploadAttachment(featureId)
-  const remove = useDeleteAttachment(featureId)
+  const removeItem = useRemoveAttachmentItem(featureId)
   const [uploadingFile, setUploadingFile] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-
-  async function openFile(storagePath: string) {
-    const supabase = getSupabaseBrowserClient()
-    const { data, error } = await supabase.storage
-      .from('feature-attachments')
-      .createSignedUrl(storagePath, 60)
-    if (error || !data?.signedUrl) return
-    window.open(data.signedUrl, '_blank', 'noopener,noreferrer')
-  }
-
-  function openItem(item: IAttachment) {
-    if (item.kind === 'link' && item.url) {
-      window.open(item.url, '_blank', 'noopener,noreferrer')
-    } else if (item.storage_path) {
-      void openFile(item.storage_path)
-    }
-  }
 
   async function handleAddLink(values: { label: string; url: string }) {
     try {
@@ -63,10 +45,8 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
     const file = e.target.files?.[0]
     e.target.value = ''
     if (!file || uploadingFile) return
-
     const storagePath = `${featureId}/${crypto.randomUUID()}-${file.name}`
     setUploadingFile(file.name)
-
     try {
       await upload.mutateAsync({ file, storagePath })
       toast.success('File uploaded.')
@@ -77,14 +57,9 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
     }
   }
 
-  async function handleRemove(item: IAttachment) {
+  async function handleRemove(rowId: string, itemIndex: number, item: AttachmentItem) {
     try {
-      await remove.mutateAsync({
-        id: item.id,
-        label: item.label,
-        kind: item.kind,
-        storage_path: item.storage_path,
-      })
+      await removeItem.mutateAsync({ rowId, itemIndex, item })
       toast.success('Removed.')
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Failed to remove')
@@ -97,21 +72,16 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
     <>
       <FeatureDetailPanel header={<h3 className="text-sm font-semibold">Files & links</h3>}>
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-          {items.length === 0 ? (
+          {rows.length === 0 ? (
             <FeatureDetailContent size="md">
               <EmptyState
                 icon={Paperclip}
                 title="Nothing attached"
-                description="Upload a file or paste an external link."
+                description="Upload a file or paste an external link. Both will be grouped in a single entry."
               />
             </FeatureDetailContent>
           ) : (
-            <AttachmentList
-              items={items}
-              canManage={canManage}
-              onOpen={openItem}
-              onRemove={handleRemove}
-            />
+            <AttachmentList rows={rows} canManage={canManage} onRemove={handleRemove} />
           )}
 
           {canManage && (

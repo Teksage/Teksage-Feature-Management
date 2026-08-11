@@ -40,8 +40,7 @@ export function buildDerivedActivity(
   }>,
   attachments: Array<{
     id: string
-    kind: string
-    label: string
+    items: Array<{ kind: string; label: string }>
     uploaded_by: string
     created_at: string
     uploader: ProfileRef
@@ -109,13 +108,16 @@ export function buildDerivedActivity(
   }
 
   for (const a of attachments) {
+    const summary = a.items
+      .map((i) => `${i.kind === 'file' ? '📎' : '🔗'} ${i.label}`)
+      .join(', ')
     push(items, {
       id: `attachment-${a.id}`,
       actor_id: a.uploaded_by,
       action: 'attachment_added',
-      field: a.kind,
+      field: 'attachment',
       old_value: null,
-      new_value: a.label,
+      new_value: summary || null,
       created_at: a.created_at,
       actor_full_name: nameOf(a.uploader, a.uploaded_by),
     }, featureId)
