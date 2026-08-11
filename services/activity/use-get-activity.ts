@@ -19,8 +19,24 @@ export interface IActivityItem {
 
 type ProfileRef = { full_name: string } | null
 
+/** Supabase may type nested profiles as object or array — normalize to one. */
+function asProfile(value: unknown): ProfileRef {
+  if (!value) return null
+  if (Array.isArray(value)) {
+    const first = value[0] as { full_name?: string } | undefined
+    return first?.full_name ? { full_name: first.full_name } : null
+  }
+  if (typeof value === 'object' && value !== null && 'full_name' in value) {
+    const name = (value as { full_name?: string }).full_name
+    return name ? { full_name: name } : null
+  }
+  return null
+}
+
 /** Soft-fail a source so one broken table cannot blank the whole timeline. */
-async function safeQuery<T>(promise: PromiseLike<{ data: T; error: { message: string } | null }>): Promise<T | null> {
+async function safeQuery<T>(
+  promise: PromiseLike<{ data: T; error: { message: string } | null }>
+): Promise<T | null> {
   try {
     const { data, error } = await promise
     if (error) {
@@ -83,31 +99,38 @@ export function useGetActivity(featureId: string) {
           ? {
               created_at: feature.created_at,
               created_by: feature.created_by,
-              creator: (feature.creator as ProfileRef) ?? null,
+              creator: asProfile(feature.creator),
             }
           : null,
         (comments ?? []).map((c) => ({
-          ...c,
-          profiles: (c.profiles as ProfileRef) ?? null,
+          id: c.id,
+          user_id: c.user_id,
+          body: c.body,
+          created_at: c.created_at,
+          profiles: asProfile(c.profiles),
         })),
         (subtasks ?? []).map((s) => ({
-          ...s,
+          id: s.id,
+          title: s.title,
           status: s.status ?? 'Idea',
-          creator: (s.creator as ProfileRef) ?? null,
+          created_by: s.created_by,
+          created_at: s.created_at,
+          updated_at: s.updated_at,
+          creator: asProfile(s.creator),
         })),
         (attachments ?? []).map((a) => ({
           id: a.id,
           items: (a.items as Array<{ kind: string; label: string }>) ?? [],
           uploaded_by: a.uploaded_by,
           created_at: a.created_at,
-          uploader: (a.uploader as ProfileRef) ?? null,
+          uploader: asProfile(a.uploader),
         })),
         doc
           ? {
               body: doc.body,
               updated_at: doc.updated_at,
               updated_by: doc.updated_by,
-              updater: (doc.updater as ProfileRef) ?? null,
+              updater: asProfile(doc.updater),
             }
           : null
       ).slice(0, 100)
