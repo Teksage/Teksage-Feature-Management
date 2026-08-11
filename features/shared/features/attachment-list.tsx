@@ -11,7 +11,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 interface AttachmentListProps {
   rows: IAttachment[]
   canManage: boolean
-  onRemove: (rowId: string, itemIndex: number, item: AttachmentItem) => Promise<void>
+  onRemove: (rowId: string, itemIndex: number, item: AttachmentItem) => void
 }
 
 async function openItem(entry: AttachmentItem) {

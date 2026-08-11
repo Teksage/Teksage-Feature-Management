@@ -29,7 +29,7 @@ export function invalidateActivity(queryClient: QueryClient, featureId: string) 
 }
 
 export function invalidateAttachments(queryClient: QueryClient, featureId: string) {
-  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.attachments, featureId] })
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.attachments, 'v2', featureId] })
 }
 
 export function invalidateDocs(queryClient: QueryClient, featureId: string) {

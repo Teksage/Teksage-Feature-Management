@@ -4,7 +4,6 @@ import { useRef, useState } from 'react'
 import { FileUp, Paperclip } from 'lucide-react'
 import { EmptyState } from '@/components/shared/feedback/empty-state'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
-import { toast } from 'sonner'
 import { useGetAttachments } from '@/services/attachments/use-get-attachments'
 import {
   useAddAttachmentLink,
@@ -32,13 +31,7 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   async function handleAddLink(values: { label: string; url: string }) {
-    try {
-      await addLink.mutateAsync(values)
-      toast.success('Link added.')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to add link')
-      throw err
-    }
+    await addLink.mutateAsync(values)
   }
 
   async function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
@@ -49,21 +42,13 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
     setUploadingFile(file.name)
     try {
       await upload.mutateAsync({ file, storagePath })
-      toast.success('File uploaded.')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to upload file')
     } finally {
       setUploadingFile(null)
     }
   }
 
-  async function handleRemove(rowId: string, itemIndex: number, item: AttachmentItem) {
-    try {
-      await removeItem.mutateAsync({ rowId, itemIndex, item })
-      toast.success('Removed.')
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Failed to remove')
-    }
+  function handleRemove(rowId: string, itemIndex: number, item: AttachmentItem) {
+    removeItem.mutate({ rowId, itemIndex, item })
   }
 
   if (isLoading) return <PageLoader />
@@ -86,7 +71,10 @@ export function FeatureAttachments({ featureId, canManage }: FeatureAttachmentsP
 
           {canManage && (
             <FeatureDetailContent size="sm" className="mt-auto space-y-4 border-t pt-4">
-              <AttachmentLinkForm disabled={!!uploadingFile} onSubmit={handleAddLink} />
+              <AttachmentLinkForm
+                disabled={!!uploadingFile || addLink.isPending}
+                onSubmit={handleAddLink}
+              />
 
               <div className="space-y-2">
                 <p className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
