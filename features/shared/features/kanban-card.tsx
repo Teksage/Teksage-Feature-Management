@@ -12,28 +12,27 @@ import {
 import { Button } from '@/components/ui/button'
 import { cn } from '@/utils/cn'
 import { useToggleVote } from '@/services/votes/use-toggle-vote'
+import { useAuthStore } from '@/store/auth-store'
+import { canDragFeature, canEditFeatureMeta } from '@/utils/feature-permissions'
 import { KANBAN_DRAG_TYPE } from '@/lib/constants'
 import type { IFeatureEntity } from '@/services/features/features.types'
 
 interface KanbanCardProps {
   feature: IFeatureEntity
   basePath: string
-  canDrag: boolean
   onEdit: (f: IFeatureEntity) => void
   onDelete: (id: string) => void
 }
 
-export function KanbanCard({
-  feature: f,
-  basePath,
-  canDrag,
-  onEdit,
-  onDelete,
-}: KanbanCardProps) {
+export function KanbanCard({ feature: f, basePath, onEdit, onDelete }: KanbanCardProps) {
   const router = useRouter()
+  const { user } = useAuthStore()
   const dragged = useRef(false)
   const [isDragging, setIsDragging] = useState(false)
   const { mutate: toggleVote, isPending: votePending } = useToggleVote()
+
+  const canDrag = canDragFeature(user, f)
+  const canEdit = canEditFeatureMeta(user)
 
   function handleDragStart(e: React.DragEvent) {
     if (!canDrag) return
@@ -81,9 +80,14 @@ export function KanbanCard({
       <p className="line-clamp-2 pl-1 text-sm font-semibold leading-snug">{f.title}</p>
 
       <div className="flex items-center justify-between gap-2 pl-1">
-        <span className="text-muted-foreground truncate text-[11px]">
-          {f.assignee_full_name ?? 'Unassigned'}
-        </span>
+        <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-[11px]">
+          <span className="truncate">{f.assignee_full_name ?? 'Unassigned'}</span>
+          {f.subtask_total > 0 && (
+            <span className="shrink-0 tabular-nums">
+              {f.subtask_done}/{f.subtask_total}
+            </span>
+          )}
+        </div>
 
         <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
           <Button
@@ -97,7 +101,7 @@ export function KanbanCard({
             <span className="tabular-nums">{f.vote_count}</span>
           </Button>
 
-          {canDrag && (
+          {canEdit && (
             <DropdownMenu>
               <DropdownMenuTrigger className="hover:bg-muted focus-visible:ring-ring inline-flex h-6 w-6 items-center justify-center rounded-md opacity-0 outline-none transition-opacity group-hover:opacity-100 focus-visible:ring-1">
                 <MoreHorizontal className="h-3.5 w-3.5" />

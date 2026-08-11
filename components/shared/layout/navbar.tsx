@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NotificationBell } from '@/components/shared/layout/notification-bell'
 import { useAuthStore } from '@/store/auth-store'
 import { useUIStore } from '@/store/ui-store'
 import { useAuth } from '@/hooks/use-auth'
@@ -39,6 +40,8 @@ export function Navbar() {
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
+        <NotificationBell />
+
         <Button
           variant="ghost"
           size="icon"

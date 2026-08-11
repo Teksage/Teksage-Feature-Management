@@ -7,5 +7,5 @@ interface Props {
 
 export default async function MemberFeatureDetailPage({ params }: Props) {
   const { id } = await params
-  return <FeatureDetail featureId={id} basePath={ROUTES.member.features} canManageStatus={false} />
+  return <FeatureDetail featureId={id} basePath={ROUTES.member.features} />
 }

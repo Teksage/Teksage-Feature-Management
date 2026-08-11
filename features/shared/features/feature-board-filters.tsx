@@ -61,12 +61,12 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex w-full flex-wrap items-center gap-2">
       <SearchBar
         value={values.search}
         onChange={(search) => patch({ search })}
         placeholder="Search features…"
-        className="w-44"
+        className="w-full min-w-0 sm:w-44"
       />
 
       <Select

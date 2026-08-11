@@ -25,6 +25,8 @@ export interface IFeatureEntity {
   category_name: string | null
   creator_full_name: string | null
   assignee_full_name: string | null
+  subtask_done: number
+  subtask_total: number
 }
 
 export interface IFeatureFilters {

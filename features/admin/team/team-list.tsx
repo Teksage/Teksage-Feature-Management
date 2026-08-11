@@ -111,7 +111,12 @@ export function TeamList() {
         </ul>
       )}
 
-      <FormDialog open={createOpen} onOpenChange={setCreateOpen} title="Add Team Member">
+      <FormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Add Team Member"
+        fieldCount={4}
+      >
         <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
           <FormFieldWrapper label="Full Name" htmlFor="fn" error={errors.fullName} required>
             <Input id="fn" {...register('fullName')} />
@@ -134,7 +139,13 @@ export function TeamList() {
         </form>
       </FormDialog>
 
-      <FormDialog open={!!editMember} onOpenChange={(o) => !o && setEditMember(null)} title="Change Role">
+      <FormDialog
+        open={!!editMember}
+        onOpenChange={(o) => !o && setEditMember(null)}
+        title="Change Role"
+        fieldCount={1}
+        maxWidth="sm"
+      >
         <FormFieldWrapper label="Role">
           <Select value={roleEdit} onValueChange={(v) => setRoleEdit(v as UserRole)}>
             <SelectTrigger><SelectValue /></SelectTrigger>

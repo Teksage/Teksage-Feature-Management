@@ -16,6 +16,7 @@ import { useGetComments } from '@/services/comments/use-get-comments'
 import { useAddComment } from '@/services/comments/use-add-comment'
 import { useDeleteComment } from '@/services/comments/use-delete-comment'
 import { useAuthStore } from '@/store/auth-store'
+import { FeatureDetailContent } from './feature-detail-content'
 
 interface FeatureCommentsProps {
   featureId: string
@@ -43,7 +44,7 @@ export function FeatureComments({ featureId }: FeatureCommentsProps) {
   if (isLoading) return <PageLoader />
 
   return (
-    <div className="space-y-4">
+    <FeatureDetailContent size="md" className="space-y-4">
       <h3 className="text-sm font-semibold">
         Comments <span className="text-muted-foreground font-normal">({comments.length})</span>
       </h3>
@@ -71,14 +72,16 @@ export function FeatureComments({ featureId }: FeatureCommentsProps) {
         </ul>
       )}
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-2">
-        <FormFieldWrapper label="Add a comment" error={errors.body}>
-          <Textarea rows={2} placeholder="Write a comment…" {...register('body')} />
-        </FormFieldWrapper>
-        <Button type="submit" size="sm" disabled={isSubmitting || addComment.isPending}>
-          Post Comment
-        </Button>
-      </form>
+      <FeatureDetailContent size="sm">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 border-t pt-4">
+          <FormFieldWrapper label="Add a comment" error={errors.body}>
+            <Textarea rows={2} placeholder="Write a comment…" {...register('body')} />
+          </FormFieldWrapper>
+          <Button type="submit" size="sm" disabled={isSubmitting || addComment.isPending}>
+            Post Comment
+          </Button>
+        </form>
+      </FeatureDetailContent>
 
       <ConfirmDialog
         open={!!deleteId}
@@ -92,6 +95,6 @@ export function FeatureComments({ featureId }: FeatureCommentsProps) {
           if (deleteId) deleteComment.mutate(deleteId, { onSuccess: () => setDeleteId(null) })
         }}
       />
-    </div>
+    </FeatureDetailContent>
   )
 }

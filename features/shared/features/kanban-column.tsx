@@ -23,7 +23,6 @@ interface KanbanColumnProps {
   tab: FeatureBoardTab
   features: IFeatureEntity[]
   basePath: string
-  canManageStatus: boolean
   onAdd: (status: FeatureStatus) => void
   onEdit: (f: IFeatureEntity) => void
   onDelete: (id: string) => void
@@ -35,7 +34,6 @@ export function KanbanColumn({
   tab,
   features,
   basePath,
-  canManageStatus,
   onAdd,
   onEdit,
   onDelete,
@@ -46,7 +44,6 @@ export function KanbanColumn({
   const [isOver, setIsOver] = useState(false)
 
   function handleDragOver(e: React.DragEvent) {
-    if (!canManageStatus) return
     e.preventDefault()
     e.dataTransfer.dropEffect = 'move'
     setIsOver(true)
@@ -99,7 +96,6 @@ export function KanbanColumn({
             key={f.id}
             feature={f}
             basePath={basePath}
-            canDrag={canManageStatus}
             onEdit={onEdit}
             onDelete={onDelete}
           />

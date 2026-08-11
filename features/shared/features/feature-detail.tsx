@@ -2,41 +2,36 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Pencil, Trash2 } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { FormDialog } from '@/components/shared/forms/form-dialog'
 import { ConfirmDialog } from '@/components/shared/forms/confirm-dialog'
-import { StatusBadge } from '@/components/shared/data-display/status-badge'
-import { ReleaseCountdown } from '@/components/shared/data-display/release-countdown'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
-import { FeatureVoteButton } from './feature-vote-button'
-import { FeatureComments } from './feature-comments'
+import { FeatureDetailOverview } from './feature-detail-overview'
 import { FeatureForm } from './feature-form'
-import { FeatureAssigneeField } from './feature-assignee-field'
-import { useGetFeature } from '@/services/features'
-import { useUpsertFeature } from '@/services/features'
-import { useDeleteFeature } from '@/services/features'
+import { FeatureSubtasks } from './feature-subtasks'
+import { FeatureActivity } from './feature-activity'
+import { FeatureDocs } from './feature-docs'
+import { FeatureAttachments } from './feature-attachments'
+import { useGetFeature, useUpsertFeature, useDeleteFeature } from '@/services/features'
 import { useGetTeam } from '@/services/team/use-get-team'
-import { FEATURE_STATUSES, FEATURE_PRIORITIES } from '@/lib/constants'
+import { useAuthStore } from '@/store/auth-store'
+import {
+  canEditFeatureMeta,
+  canManageAssignedFeature,
+} from '@/utils/feature-permissions'
 import type { FeatureInput } from '@/lib/validations/feature'
 import type { FeatureStatus, FeaturePriority } from '@/types/supabase.types'
 
 interface FeatureDetailProps {
   featureId: string
   basePath: string
-  canManageStatus: boolean
 }
 
-export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureDetailProps) {
+export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
   const router = useRouter()
+  const { user } = useAuthStore()
   const { data: feature, isLoading } = useGetFeature(featureId)
   const { data: members = [] } = useGetTeam()
   const upsert = useUpsertFeature()
@@ -44,9 +39,10 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
   const [editOpen, setEditOpen] = useState(false)
   const [deleteOpen, setDeleteOpen] = useState(false)
 
-  function toPayload(
-    overrides: Partial<FeatureInput> = {}
-  ): FeatureInput & { id: string } {
+  const canManage = feature ? canManageAssignedFeature(user, feature) : false
+  const canEditMeta = canEditFeatureMeta(user)
+
+  function toPayload(overrides: Partial<FeatureInput> = {}): FeatureInput & { id: string } {
     return {
       title: feature!.title,
       description: feature!.description ?? '',
@@ -67,29 +63,29 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
   }
 
   async function handleStatusChange(value: FeatureStatus | null) {
-    if (!feature || !value) return
+    if (!feature || !value || !canManage) return
     try {
       await upsert.mutateAsync(toPayload({ status: value }))
     } catch {
-      /* toast via mutation onError */
+      /* toast via onError */
     }
   }
 
   async function handlePriorityChange(value: FeaturePriority | null) {
-    if (!feature || !value) return
+    if (!feature || !value || !canEditMeta) return
     try {
       await upsert.mutateAsync(toPayload({ priority: value }))
     } catch {
-      /* toast via mutation onError */
+      /* toast via onError */
     }
   }
 
   async function handleAssigneeChange(assigneeId: string) {
-    if (!feature) return
+    if (!feature || !canEditMeta) return
     try {
       await upsert.mutateAsync(toPayload({ assigneeId }))
     } catch {
-      /* toast via mutation onError */
+      /* toast via onError */
     }
   }
 
@@ -97,89 +93,85 @@ export function FeatureDetail({ featureId, basePath, canManageStatus }: FeatureD
   if (!feature) return <p className="text-muted-foreground p-6">Feature not found.</p>
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center gap-2">
+    <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
+      <div className="flex items-center justify-between gap-3">
         <Button variant="ghost" size="sm" onClick={() => router.push(basePath)}>
           <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Button>
+        <p className="text-muted-foreground truncate text-sm font-medium">{feature.title}</p>
       </div>
 
-      <div className="space-y-3">
-        <div className="flex items-start justify-between gap-4">
-          <h1 className="text-xl font-bold leading-tight">{feature.title}</h1>
-          <FeatureVoteButton featureId={feature.id} voteCount={feature.vote_count} hasVoted={feature.has_voted} />
-        </div>
+      <Tabs defaultValue="overview" className="flex min-h-0 w-full flex-1 flex-col gap-4">
+        <TabsList className="bg-muted/60 flex h-auto w-full flex-wrap justify-start gap-1 p-1">
+          <TabsTrigger value="overview" className="min-w-24 flex-1 sm:flex-none">
+            Overview
+          </TabsTrigger>
+          <TabsTrigger value="subtasks" className="min-w-24 flex-1 sm:flex-none">
+            Subtasks
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="min-w-24 flex-1 sm:flex-none">
+            Activity
+          </TabsTrigger>
+          <TabsTrigger value="docs" className="min-w-24 flex-1 sm:flex-none">
+            Docs
+          </TabsTrigger>
+          <TabsTrigger value="files" className="min-w-24 flex-1 sm:flex-none">
+            Files
+          </TabsTrigger>
+        </TabsList>
 
-        <div className="flex flex-wrap gap-2 items-center">
-          {canManageStatus ? (
-            <>
-              <Select value={feature.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="h-7 w-36 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FEATURE_STATUSES.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                </SelectContent>
-              </Select>
-              <Select value={feature.priority} onValueChange={handlePriorityChange}>
-                <SelectTrigger className="h-7 w-28 text-xs"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {FEATURE_PRIORITIES.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}
-                </SelectContent>
-              </Select>
-            </>
-          ) : (
-            <>
-              <StatusBadge status={feature.status} />
-              <StatusBadge status={feature.priority} />
-            </>
-          )}
-          {feature.category_name && <span className="text-muted-foreground text-xs">in {feature.category_name}</span>}
-          <span className="text-muted-foreground rounded-full border px-2 py-0.5 text-[11px]">
-            {feature.platform}
-          </span>
-          <ReleaseCountdown date={feature.target_release} showDate />
-        </div>
+        <TabsContent value="overview" className="mt-0 min-h-0 flex-1 outline-none">
+          <FeatureDetailOverview
+            feature={feature}
+            members={members}
+            canChangeStatus={canManage}
+            canEditMeta={canEditMeta}
+            onStatusChange={handleStatusChange}
+            onPriorityChange={handlePriorityChange}
+            onAssigneeChange={handleAssigneeChange}
+            onEdit={() => setEditOpen(true)}
+            onDelete={() => setDeleteOpen(true)}
+          />
+        </TabsContent>
+        <TabsContent value="subtasks" className="mt-0 min-h-0 flex-1 outline-none">
+          <FeatureSubtasks featureId={featureId} canManage={canManage} />
+        </TabsContent>
+        <TabsContent value="activity" className="mt-0 min-h-0 flex-1 outline-none">
+          <FeatureActivity featureId={featureId} />
+        </TabsContent>
+        <TabsContent value="docs" className="mt-0 min-h-0 flex-1 outline-none">
+          <FeatureDocs featureId={featureId} canEdit={canEditMeta} />
+        </TabsContent>
+        <TabsContent value="files" className="mt-0 min-h-0 flex-1 outline-none">
+          <FeatureAttachments featureId={featureId} canManage={canEditMeta} />
+        </TabsContent>
+      </Tabs>
 
-        {canManageStatus ? (
-          <div className="max-w-xs">
-            <FeatureAssigneeField
-              members={members}
-              assigneeId={feature.assignee_id ?? ''}
-              onChange={handleAssigneeChange}
-              triggerClassName="h-8 w-full text-xs"
-            />
-          </div>
-        ) : (
-          <p className="text-muted-foreground text-sm">
-            Owner:{' '}
-            <span className="text-foreground font-medium">
-              {feature.assignee_full_name ?? 'Unassigned'}
-            </span>
-          </p>
-        )}
+      {canEditMeta && (
+        <FormDialog open={editOpen} onOpenChange={setEditOpen} title="Edit Feature" fieldCount={8}>
+          <FeatureForm
+            defaultValues={feature}
+            canManageStatus
+            isSubmitting={upsert.isPending}
+            onSubmit={handleEdit}
+          />
+        </FormDialog>
+      )}
 
-        {feature.description && <p className="text-sm text-muted-foreground whitespace-pre-wrap">{feature.description}</p>}
-
-        {canManageStatus && (
-          <div className="flex gap-2 pt-1">
-            <Button variant="outline" size="sm" onClick={() => setEditOpen(true)}>
-              <Pencil className="mr-1 h-3.5 w-3.5" /> Edit
-            </Button>
-            <Button variant="outline" size="sm" onClick={() => setDeleteOpen(true)} className="text-destructive hover:text-destructive">
-              <Trash2 className="mr-1 h-3.5 w-3.5" /> Delete
-            </Button>
-          </div>
-        )}
-      </div>
-
-      <Separator />
-      <FeatureComments featureId={featureId} />
-
-      <FormDialog open={editOpen} onOpenChange={setEditOpen} title="Edit Feature">
-        <FeatureForm defaultValues={feature} canManageStatus={canManageStatus} isSubmitting={upsert.isPending} onSubmit={handleEdit} />
-      </FormDialog>
-
-      <ConfirmDialog open={deleteOpen} onOpenChange={setDeleteOpen} title="Delete Feature" description="This will permanently delete the feature." confirmLabel="Delete" variant="destructive" loading={deleteFeature.isPending}
-        onConfirm={() => deleteFeature.mutate(featureId, { onSuccess: () => router.push(basePath) })} />
+      {canEditMeta && (
+        <ConfirmDialog
+          open={deleteOpen}
+          onOpenChange={setDeleteOpen}
+          title="Delete Feature"
+          description="This will permanently delete the feature."
+          confirmLabel="Delete"
+          variant="destructive"
+          loading={deleteFeature.isPending}
+          onConfirm={() =>
+            deleteFeature.mutate(featureId, { onSuccess: () => router.push(basePath) })
+          }
+        />
+      )}
     </div>
   )
 }

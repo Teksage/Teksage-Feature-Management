@@ -14,15 +14,28 @@ type FeatureRow = Record<string, unknown> & {
 export function mapFeatureRow(
   row: FeatureRow,
   voteCount: number,
-  hasVoted: boolean
+  hasVoted: boolean,
+  subtaskDone = 0,
+  subtaskTotal = 0
 ): IFeatureEntity {
   const { feature_categories, creator, assignee, ...rest } = row
   return {
-    ...(rest as Omit<IFeatureEntity, 'category_name' | 'creator_full_name' | 'assignee_full_name' | 'vote_count' | 'has_voted'>),
+    ...(rest as Omit<
+      IFeatureEntity,
+      | 'category_name'
+      | 'creator_full_name'
+      | 'assignee_full_name'
+      | 'vote_count'
+      | 'has_voted'
+      | 'subtask_done'
+      | 'subtask_total'
+    >),
     category_name: feature_categories?.name ?? null,
     creator_full_name: creator?.full_name ?? null,
     assignee_full_name: assignee?.full_name ?? null,
     vote_count: voteCount,
     has_voted: hasVoted,
+    subtask_done: subtaskDone,
+    subtask_total: subtaskTotal,
   }
 }

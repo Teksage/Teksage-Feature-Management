@@ -11,6 +11,7 @@ Built with **Next.js 16**, **Supabase**, **TanStack Query**, and **shadcn/ui** â
 - Priority, categories (set when creating a feature), voting, and comments
 - Feature owners (assign a teammate) with board filter
 - Dashboard charts for pipeline status and priority mix
+- Subtasks, list view, activity history, docs, attachments, and in-app notifications
 - Admin team management
 - Role-based dashboards with stats and top-voted ideas
 
