@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { AlertTriangle, LayoutGrid, List } from 'lucide-react'
+import { AlertTriangle, LayoutGrid, List, Kanban } from 'lucide-react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { PageHeader } from '@/components/shared/layout/page-header'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
@@ -81,15 +81,20 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
   if (isLoading) return <PageLoader />
 
   return (
-    <div className="flex h-full flex-col gap-4">
-      <PageHeader title="Features" description="Track Web and App delivery on separate boards.">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="bg-muted flex rounded-lg p-0.5">
+    <div className="flex h-full flex-col gap-5">
+      <PageHeader
+        icon={Kanban}
+        title="Features"
+        description="Track Web and App delivery on separate boards. Drag cards to update status."
+        footer={<FeatureBoardFilters values={filters} onChange={setFilters} />}
+      >
+        <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
+          <div className="bg-muted/80 inline-flex rounded-xl border p-1 shadow-sm">
             <Button
               type="button"
               variant={view === 'board' ? 'secondary' : 'ghost'}
               size="sm"
-              className="h-8 gap-1"
+              className="h-8 rounded-lg px-3"
               onClick={() => setView('board')}
             >
               <LayoutGrid className="h-3.5 w-3.5" /> Board
@@ -98,13 +103,15 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
               type="button"
               variant={view === 'list' ? 'secondary' : 'ghost'}
               size="sm"
-              className="h-8 gap-1"
+              className="h-8 rounded-lg px-3"
               onClick={() => setView('list')}
             >
               <List className="h-3.5 w-3.5" /> List
             </Button>
           </div>
-          <FeatureBoardFilters values={filters} onChange={setFilters} />
+          <span className="text-muted-foreground bg-muted/50 rounded-full border px-3 py-1 text-xs font-medium tabular-nums">
+            {tabFeatures.length} feature{tabFeatures.length === 1 ? '' : 's'}
+          </span>
         </div>
       </PageHeader>
 

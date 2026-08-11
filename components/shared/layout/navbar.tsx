@@ -26,7 +26,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="bg-background/80 sticky top-0 z-40 flex h-14 items-center justify-between border-b px-4 backdrop-blur">
+    <header className="glass-panel sticky top-0 z-40 flex h-14 items-center justify-between border-b px-4 shadow-sm">
       <Button
         variant="ghost"
         size="icon"

@@ -73,7 +73,9 @@ export function FeatureListView({ features, basePath }: FeatureListViewProps) {
 
   return (
     <div className="space-y-2">
-      <DataTable data={pageItems} columns={columns} keyExtractor={(r) => r.id} />
+      <div className="glass-panel rounded-xl border p-3 shadow-sm">
+        <DataTable data={pageItems} columns={columns} keyExtractor={(r) => r.id} />
+      </div>
       <PaginationControls
         page={state.page}
         totalPages={state.totalPages}

@@ -1,16 +1,10 @@
 'use client'
 
-import { Trash2 } from 'lucide-react'
+import { CheckCircle2, Circle, Lightbulb, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { StatusBadge } from '@/components/shared/data-display/status-badge'
-import { SUBTASK_STATUSES } from '@/lib/constants'
+import { SubtaskStatusSelect } from './subtask-status-select'
+import { subtaskStatusStyle } from './subtask-status-styles'
 import type { ISubtask } from '@/services/subtasks/use-get-subtasks'
 import type { SubtaskStatus } from '@/types/supabase.types'
 import { cn } from '@/utils/cn'
@@ -22,38 +16,42 @@ interface SubtaskRowProps {
   onDelete: (id: string, title: string) => void
 }
 
+function StatusIcon({ status }: { status: SubtaskStatus }) {
+  if (status === 'Completed') return <CheckCircle2 className="text-success h-4 w-4 shrink-0" />
+  if (status === 'In Progress') return <Circle className="text-warning h-4 w-4 shrink-0" />
+  return <Lightbulb className="text-muted-foreground h-4 w-4 shrink-0" />
+}
+
 export function SubtaskRow({ subtask, canManage, onStatusChange, onDelete }: SubtaskRowProps) {
   const isComplete = subtask.status === 'Completed'
+  const tone = subtaskStatusStyle(subtask.status)
 
   return (
-    <li className="bg-muted/30 flex flex-wrap items-center gap-2 rounded-lg border px-3 py-2.5 sm:gap-3">
+    <li
+      className={cn(
+        'group bg-card flex flex-wrap items-center gap-3 rounded-xl border border-l-4 px-3 py-3 shadow-sm transition-all duration-200',
+        'hover:shadow-md',
+        tone.row,
+        isComplete && 'bg-muted/20'
+      )}
+    >
+      {!canManage && <StatusIcon status={subtask.status} />}
+
       {canManage ? (
-        <Select
+        <SubtaskStatusSelect
           value={subtask.status}
-          onValueChange={(v) => {
-            if (!v) return
-            onStatusChange(subtask.id, subtask.title, v as SubtaskStatus, subtask.status)
-          }}
-        >
-          <SelectTrigger className="h-8 w-[8.5rem] shrink-0 text-xs">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {SUBTASK_STATUSES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {s}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          onChange={(status) =>
+            onStatusChange(subtask.id, subtask.title, status, subtask.status)
+          }
+        />
       ) : (
         <StatusBadge status={subtask.status} className="shrink-0 text-xs" />
       )}
 
       <span
         className={cn(
-          'min-w-0 flex-1 text-sm',
-          isComplete && 'text-muted-foreground line-through'
+          'min-w-0 flex-1 text-sm font-medium',
+          isComplete && 'text-muted-foreground line-through decoration-success/40'
         )}
       >
         {subtask.title}
@@ -64,10 +62,10 @@ export function SubtaskRow({ subtask, canManage, onStatusChange, onDelete }: Sub
           type="button"
           variant="ghost"
           size="icon"
-          className="h-7 w-7 shrink-0"
+          className="h-8 w-8 shrink-0 opacity-70 transition-opacity group-hover:opacity-100"
           onClick={() => onDelete(subtask.id, subtask.title)}
         >
-          <Trash2 className="text-destructive h-3.5 w-3.5" />
+          <Trash2 className="text-destructive h-4 w-4" />
         </Button>
       )}
     </li>

@@ -1,12 +1,11 @@
 'use client'
 
-import { Lightbulb, CheckCircle2, BarChart3, AlertTriangle } from 'lucide-react'
-import Link from 'next/link'
+import { LayoutDashboard, Lightbulb, CheckCircle2, BarChart3, AlertTriangle, Star } from 'lucide-react'
 import { PageHeader } from '@/components/shared/layout/page-header'
 import { StatsCard } from '@/components/shared/data-display/stats-card'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
-import { StatusBadge } from '@/components/shared/data-display/status-badge'
-import { UpcomingReleases } from '@/components/shared/data-display/upcoming-releases'
+import { SectionPanel } from '@/components/shared/data-display/section-panel'
+import { UpcomingReleases, FeatureLinkList } from '@/components/shared/data-display/upcoming-releases'
 import { DashboardCharts } from '@/features/shared/dashboard/dashboard-charts'
 import { useDashboardStats } from '@/services/dashboard/use-dashboard-stats'
 import { ROUTES } from '@/lib/constants'
@@ -18,8 +17,12 @@ export function MemberDashboard() {
   if (!stats) return null
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Dashboard" description="Your product ideas at a glance." />
+    <div className="space-y-8">
+      <PageHeader
+        icon={LayoutDashboard}
+        title="Dashboard"
+        description="Your product ideas at a glance — vote, comment, and track what ships next."
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatsCard title="Total Features" value={stats.totalFeatures} icon={Lightbulb} variant="primary" />
@@ -33,25 +36,13 @@ export function MemberDashboard() {
       <div className="grid gap-6 lg:grid-cols-2">
         <UpcomingReleases features={stats.allFeatures} basePath={ROUTES.member.features} />
 
-        <div className="space-y-3">
-          <h2 className="text-sm font-semibold">Top Voted Features</h2>
-          <ul className="space-y-2">
-            {stats.topVoted.map((f) => (
-              <li key={f.id} className="bg-card flex items-center justify-between rounded-lg border px-4 py-3">
-                <Link
-                  href={`${ROUTES.member.features}/${f.id}`}
-                  className="hover:text-primary truncate text-sm font-medium"
-                >
-                  {f.title}
-                </Link>
-                <div className="ml-2 flex shrink-0 items-center gap-2">
-                  <StatusBadge status={f.status} />
-                  <span className="text-muted-foreground text-xs tabular-nums">{f.vote_count} votes</span>
-                </div>
-              </li>
-            ))}
-          </ul>
-        </div>
+        <SectionPanel title="Top Voted Features" icon={Star}>
+          <FeatureLinkList
+            features={stats.topVoted}
+            basePath={ROUTES.member.features}
+            showVotes
+          />
+        </SectionPanel>
       </div>
     </div>
   )

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { StatusBadge } from '@/components/shared/data-display/status-badge'
 import { FormDialog } from '@/components/shared/forms/form-dialog'
 import { ConfirmDialog } from '@/components/shared/forms/confirm-dialog'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
@@ -93,29 +94,32 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
   if (!feature) return <p className="text-muted-foreground p-6">Feature not found.</p>
 
   return (
-    <div className="flex w-full min-w-0 flex-1 flex-col gap-4">
-      <div className="flex items-center justify-between gap-3">
+    <div className="flex w-full min-w-0 flex-1 flex-col gap-5">
+      <div className="glass-panel flex items-center justify-between gap-3 rounded-2xl border px-4 py-3">
         <Button variant="ghost" size="sm" onClick={() => router.push(basePath)}>
           <ArrowLeft className="mr-1 h-4 w-4" /> Back
         </Button>
-        <p className="text-muted-foreground truncate text-sm font-medium">{feature.title}</p>
+        <p className="min-w-0 flex-1 truncate text-center text-sm font-semibold sm:text-base">
+          {feature.title}
+        </p>
+        <StatusBadge status={feature.status} className="shrink-0" />
       </div>
 
       <Tabs defaultValue="overview" className="flex min-h-0 w-full flex-1 flex-col gap-4">
-        <TabsList className="bg-muted/60 flex h-auto w-full flex-wrap justify-start gap-1 p-1">
-          <TabsTrigger value="overview" className="min-w-24 flex-1 sm:flex-none">
+        <TabsList className="glass-panel flex h-auto w-full flex-wrap justify-start gap-1 rounded-xl p-1.5 shadow-sm">
+          <TabsTrigger value="overview" className="min-w-24 flex-1 rounded-lg sm:flex-none">
             Overview
           </TabsTrigger>
-          <TabsTrigger value="subtasks" className="min-w-24 flex-1 sm:flex-none">
+          <TabsTrigger value="subtasks" className="min-w-24 flex-1 rounded-lg sm:flex-none">
             Subtasks
           </TabsTrigger>
-          <TabsTrigger value="activity" className="min-w-24 flex-1 sm:flex-none">
+          <TabsTrigger value="activity" className="min-w-24 flex-1 rounded-lg sm:flex-none">
             Activity
           </TabsTrigger>
-          <TabsTrigger value="docs" className="min-w-24 flex-1 sm:flex-none">
+          <TabsTrigger value="docs" className="min-w-24 flex-1 rounded-lg sm:flex-none">
             Docs
           </TabsTrigger>
-          <TabsTrigger value="files" className="min-w-24 flex-1 sm:flex-none">
+          <TabsTrigger value="files" className="min-w-24 flex-1 rounded-lg sm:flex-none">
             Files
           </TabsTrigger>
         </TabsList>

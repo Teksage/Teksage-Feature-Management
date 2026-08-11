@@ -13,7 +13,10 @@ import { useDeleteSubtask } from '@/services/subtasks/use-delete-subtask'
 import { FeatureDetailPanel } from './feature-detail-panel'
 import { FeatureDetailContent } from './feature-detail-content'
 import { SubtaskRow } from './subtask-row'
+import { subtaskStatusStyle } from './subtask-status-styles'
+import { SUBTASK_STATUSES } from '@/lib/constants'
 import type { SubtaskStatus } from '@/types/supabase.types'
+import { cn } from '@/utils/cn'
 
 interface FeatureSubtasksProps {
   featureId: string
@@ -28,6 +31,15 @@ export function FeatureSubtasks({ featureId, canManage }: FeatureSubtasksProps) 
   const [title, setTitle] = useState('')
 
   const done = subtasks.filter((s) => s.status === 'Completed').length
+  const progress = subtasks.length ? Math.round((done / subtasks.length) * 100) : 0
+
+  const counts = SUBTASK_STATUSES.reduce(
+    (acc, status) => {
+      acc[status] = subtasks.filter((s) => s.status === status).length
+      return acc
+    },
+    {} as Record<SubtaskStatus, number>
+  )
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault()
@@ -51,12 +63,46 @@ export function FeatureSubtasks({ featureId, canManage }: FeatureSubtasksProps) 
   return (
     <FeatureDetailPanel
       header={
-        <h3 className="text-sm font-semibold">
-          Subtasks{' '}
-          <span className="text-muted-foreground font-normal">
-            ({done}/{subtasks.length})
-          </span>
-        </h3>
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h3 className="text-base font-semibold tracking-tight">
+              Subtasks{' '}
+              <span className="text-muted-foreground font-normal">
+                ({done}/{subtasks.length})
+              </span>
+            </h3>
+            {subtasks.length > 0 && (
+              <span className="text-muted-foreground text-xs font-medium tabular-nums">
+                {progress}% complete
+              </span>
+            )}
+          </div>
+
+          {subtasks.length > 0 && (
+            <>
+              <div className="bg-muted h-2 overflow-hidden rounded-full">
+                <div
+                  className="from-primary to-success h-full rounded-full bg-gradient-to-r transition-all duration-500"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {SUBTASK_STATUSES.map((status) => (
+                  <span
+                    key={status}
+                    className={cn(
+                      'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium',
+                      subtaskStatusStyle(status).trigger
+                    )}
+                  >
+                    <span className={cn('h-1.5 w-1.5 rounded-full', subtaskStatusStyle(status).dot)} />
+                    {counts[status]} {status}
+                  </span>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       }
     >
       <div className="flex min-h-0 flex-1 flex-col gap-4">
@@ -74,7 +120,7 @@ export function FeatureSubtasks({ featureId, canManage }: FeatureSubtasksProps) 
           </FeatureDetailContent>
         ) : (
           <FeatureDetailContent size="md">
-            <ul className="space-y-2">
+            <ul className="space-y-2.5">
               {subtasks.map((s) => (
                 <SubtaskRow
                   key={s.id}
@@ -92,13 +138,13 @@ export function FeatureSubtasks({ featureId, canManage }: FeatureSubtasksProps) 
           <FeatureDetailContent size="xs">
             <form
               onSubmit={handleAdd}
-              className="mt-auto flex flex-col gap-2 border-t pt-4 sm:flex-row sm:items-center"
+              className="bg-muted/30 mt-auto flex flex-col gap-2 rounded-xl border p-3 sm:flex-row sm:items-center"
             >
               <Input
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Add a subtask…"
-                className="min-w-0 sm:flex-1"
+                className="min-w-0 bg-background sm:flex-1"
               />
               <Button
                 type="submit"

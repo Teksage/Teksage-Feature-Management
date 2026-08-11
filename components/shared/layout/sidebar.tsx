@@ -20,11 +20,11 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        'bg-sidebar relative flex h-full flex-col border-r transition-all duration-300',
-        sidebarCollapsed ? 'w-[60px]' : 'w-[220px]'
+        'bg-sidebar relative flex h-full flex-col border-r shadow-sm transition-all duration-300',
+        sidebarCollapsed ? 'w-[60px]' : 'w-[240px]'
       )}
     >
-      <div className="flex h-14 items-center border-b px-3">
+      <div className="from-primary/5 flex h-16 items-center border-b bg-gradient-to-r to-transparent px-3">
         <BrandMark collapsed={sidebarCollapsed} />
       </div>
 
@@ -53,8 +53,8 @@ export function Sidebar() {
 
       {/* User info */}
       {!sidebarCollapsed && user && (
-        <div className="border-t p-3">
-          <p className="truncate text-xs font-medium">{user.fullName}</p>
+        <div className="bg-sidebar-accent/30 border-t p-3">
+          <p className="truncate text-sm font-medium">{user.fullName}</p>
           <p className="text-muted-foreground truncate text-xs">{user.role}</p>
         </div>
       )}

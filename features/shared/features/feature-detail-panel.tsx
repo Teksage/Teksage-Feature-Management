@@ -4,7 +4,6 @@ import { cn } from '@/utils/cn'
 interface FeatureDetailPanelProps {
   children: ReactNode
   className?: string
-  /** Optional header row (title + actions). */
   header?: ReactNode
 }
 
@@ -13,11 +12,14 @@ export function FeatureDetailPanel({ children, className, header }: FeatureDetai
   return (
     <section
       className={cn(
-        'bg-card flex min-h-[min(70vh,720px)] w-full flex-col gap-4 rounded-xl border p-4 sm:p-6',
+        'bg-card flex min-h-[min(70vh,720px)] w-full flex-col gap-4 rounded-2xl border p-4 shadow-card sm:p-6',
+        'ring-border/50 ring-1',
         className
       )}
     >
-      {header}
+      {header && (
+        <div className="border-border/60 border-b pb-3">{header}</div>
+      )}
       <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </section>
   )

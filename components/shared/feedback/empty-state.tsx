@@ -17,21 +17,28 @@ export function EmptyState({ icon: Icon, title, description, action, className }
   return (
     <div
       className={cn(
-        'bg-muted/30 flex flex-col items-center justify-center rounded-xl border border-dashed px-6 py-12 text-center',
+        'relative flex flex-col items-center justify-center overflow-hidden rounded-2xl border border-dashed px-6 py-14 text-center',
+        'from-muted/40 to-muted/10 bg-gradient-to-b',
         className
       )}
     >
+      <div
+        className="from-primary/10 pointer-events-none absolute inset-0 bg-gradient-to-br via-transparent to-brand-secondary/5"
+        aria-hidden
+      />
       {Icon && (
-        <div className="bg-primary/10 mb-4 flex h-14 w-14 items-center justify-center rounded-full">
-          <Icon className="text-primary h-7 w-7" />
+        <div className="bg-primary/10 ring-primary/20 relative mb-5 flex h-16 w-16 items-center justify-center rounded-2xl ring-1">
+          <Icon className="text-primary h-8 w-8" />
         </div>
       )}
-      <h3 className="text-base font-semibold">{title}</h3>
+      <h3 className="relative text-lg font-semibold tracking-tight">{title}</h3>
       {description && (
-        <p className="text-muted-foreground mt-1.5 max-w-sm text-sm">{description}</p>
+        <p className="text-muted-foreground relative mt-2 max-w-sm text-sm leading-relaxed">
+          {description}
+        </p>
       )}
       {action && (
-        <Button onClick={action.onClick} className="mt-4">
+        <Button onClick={action.onClick} className="relative mt-5">
           {action.label}
         </Button>
       )}

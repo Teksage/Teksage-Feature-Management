@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo } from 'react'
-import { X } from 'lucide-react'
+import { Filter, X } from 'lucide-react'
 import { SearchBar } from '@/components/shared/forms/search-bar'
 import { Button } from '@/components/ui/button'
 import {
@@ -31,6 +31,15 @@ interface FeatureBoardFiltersProps {
   onChange: (next: FeatureBoardFilterValues) => void
 }
 
+function FilterField({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-muted-foreground text-xs font-medium">{label}</label>
+      {children}
+    </div>
+  )
+}
+
 export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersProps) {
   const { data: categories = [] } = useGetCategories()
   const { data: members = [] } = useGetTeam()
@@ -41,6 +50,22 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
     !!values.categoryId ||
     !!values.assigneeId
 
+  const priorityItems = useMemo(
+    () => ({
+      [ALL]: 'All priorities',
+      ...Object.fromEntries(FEATURE_PRIORITIES.map((p) => [p, p])),
+    }),
+    []
+  )
+  const platformItems = useMemo(
+    () => ({
+      [ALL]: 'All platforms',
+      ...Object.fromEntries(
+        FEATURE_PLATFORMS.map((p) => [p, p === 'Both' ? 'Both (Web + App)' : p])
+      ),
+    }),
+    []
+  )
   const categoryItems = useMemo(
     () => ({
       [ALL]: 'All categories',
@@ -61,108 +86,128 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
   }
 
   return (
-    <div className="flex w-full flex-wrap items-center gap-2">
-      <SearchBar
-        value={values.search}
-        onChange={(search) => patch({ search })}
-        placeholder="Search features…"
-        className="w-full min-w-0 sm:w-44"
-      />
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <Filter className="text-muted-foreground h-4 w-4" />
+          <span className="text-sm font-semibold">Filters</span>
+        </div>
+        {hasActive && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground h-8 gap-1.5 px-2"
+            onClick={() =>
+              onChange({
+                search: '',
+                priority: undefined,
+                platform: undefined,
+                categoryId: undefined,
+                assigneeId: undefined,
+              })
+            }
+          >
+            <X className="h-3.5 w-3.5" />
+            Clear all
+          </Button>
+        )}
+      </div>
 
-      <Select
-        value={values.priority ?? ALL}
-        onValueChange={(v) =>
-          patch({ priority: !v || v === ALL ? undefined : (v as FeaturePriority) })
-        }
-      >
-        <SelectTrigger className="h-9 w-[130px]" size="sm">
-          <SelectValue placeholder="Priority" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All priorities</SelectItem>
-          {FEATURE_PRIORITIES.map((p) => (
-            <SelectItem key={p} value={p}>
-              {p}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <FilterField label="Search">
+        <SearchBar
+          value={values.search}
+          onChange={(search) => patch({ search })}
+          placeholder="Search by feature title…"
+          className="w-full"
+        />
+      </FilterField>
 
-      <Select
-        value={values.platform ?? ALL}
-        onValueChange={(v) =>
-          patch({ platform: !v || v === ALL ? undefined : (v as FeaturePlatform) })
-        }
-      >
-        <SelectTrigger className="h-9 w-[130px]" size="sm">
-          <SelectValue placeholder="Platform" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All platforms</SelectItem>
-          {FEATURE_PLATFORMS.map((p) => (
-            <SelectItem key={p} value={p}>
-              {p === 'Both' ? 'Both (Web + App)' : p}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <FilterField label="Priority">
+          <Select
+            items={priorityItems}
+            value={values.priority ?? ALL}
+            onValueChange={(v) =>
+              patch({ priority: !v || v === ALL ? undefined : (v as FeaturePriority) })
+            }
+          >
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All priorities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All priorities</SelectItem>
+              {FEATURE_PRIORITIES.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterField>
 
-      <Select
-        items={categoryItems}
-        value={values.categoryId ?? ALL}
-        onValueChange={(v) => patch({ categoryId: !v || v === ALL ? undefined : v })}
-      >
-        <SelectTrigger className="h-9 w-[140px]" size="sm">
-          <SelectValue placeholder="Category" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All categories</SelectItem>
-          {categories.map((c) => (
-            <SelectItem key={c.id} value={c.id}>
-              {c.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <FilterField label="Platform">
+          <Select
+            items={platformItems}
+            value={values.platform ?? ALL}
+            onValueChange={(v) =>
+              patch({ platform: !v || v === ALL ? undefined : (v as FeaturePlatform) })
+            }
+          >
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All platforms" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All platforms</SelectItem>
+              {FEATURE_PLATFORMS.map((p) => (
+                <SelectItem key={p} value={p}>
+                  {p === 'Both' ? 'Both (Web + App)' : p}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterField>
 
-      <Select
-        items={assigneeItems}
-        value={values.assigneeId ?? ALL}
-        onValueChange={(v) => patch({ assigneeId: !v || v === ALL ? undefined : v })}
-      >
-        <SelectTrigger className="h-9 w-[140px]" size="sm">
-          <SelectValue placeholder="Owner" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value={ALL}>All owners</SelectItem>
-          {members.map((m) => (
-            <SelectItem key={m.id} value={m.id}>
-              {m.full_name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        <FilterField label="Category">
+          <Select
+            items={categoryItems}
+            value={values.categoryId ?? ALL}
+            onValueChange={(v) => patch({ categoryId: !v || v === ALL ? undefined : v })}
+          >
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All categories" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All categories</SelectItem>
+              {categories.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterField>
 
-      {hasActive && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          className="h-9 gap-1 px-2"
-          onClick={() =>
-            onChange({
-              search: '',
-              priority: undefined,
-              platform: undefined,
-              categoryId: undefined,
-              assigneeId: undefined,
-            })
-          }
-        >
-          <X className="h-3.5 w-3.5" />
-          Clear
-        </Button>
-      )}
+        <FilterField label="Owner">
+          <Select
+            items={assigneeItems}
+            value={values.assigneeId ?? ALL}
+            onValueChange={(v) => patch({ assigneeId: !v || v === ALL ? undefined : v })}
+          >
+            <SelectTrigger className="h-10 w-full">
+              <SelectValue placeholder="All owners" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value={ALL}>All owners</SelectItem>
+              {members.map((m) => (
+                <SelectItem key={m.id} value={m.id}>
+                  {m.full_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </FilterField>
+      </div>
     </div>
   )
 }

@@ -38,7 +38,7 @@ export function FeatureCard({
       onClick={onClick}
       className={cn(
         'group shadow-card gap-0 py-0 transition-all duration-200',
-        'hover:shadow-dropdown hover:ring-primary/20 hover:-translate-y-0.5',
+        'hover:shadow-dropdown hover:ring-primary/25 hover:-translate-y-0.5',
         highlighted && 'ring-primary/30',
         onClick && 'cursor-pointer',
         className

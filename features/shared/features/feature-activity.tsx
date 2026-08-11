@@ -76,7 +76,7 @@ export function FeatureActivity({ featureId }: FeatureActivityProps) {
               return (
                 <li
                   key={item.id}
-                  className="bg-muted/30 flex gap-3 rounded-lg border px-3 py-2.5"
+                  className="bg-muted/20 hover:bg-muted/30 flex gap-3 rounded-xl border px-3 py-3 transition-colors"
                 >
                   <UserAvatar name={name} size="sm" />
                   <div className="min-w-0 flex-1">

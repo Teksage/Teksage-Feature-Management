@@ -54,7 +54,7 @@ export function FeatureComments({ featureId }: FeatureCommentsProps) {
       ) : (
         <ul className="space-y-3">
           {comments.map((c) => (
-            <li key={c.id} className="bg-muted/30 rounded-lg border p-3 text-sm">
+            <li key={c.id} className="bg-muted/20 hover:bg-muted/30 rounded-xl border p-3 text-sm transition-colors">
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <span className="font-medium">{c.author_name}</span>
