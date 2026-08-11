@@ -14,7 +14,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <MobileSidebar />
         <div className="flex flex-1 flex-col overflow-hidden min-w-0">
           <Navbar />
-          <main className="flex min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6">{children}</main>
+          <main className="page-mesh flex min-h-0 flex-1 flex-col overflow-y-auto p-4 sm:p-6 lg:p-8">
+            {children}
+          </main>
         </div>
       </div>
     </>

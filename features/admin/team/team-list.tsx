@@ -21,6 +21,8 @@ import { FormFieldWrapper } from '@/components/shared/forms/form-field-wrapper'
 import { PageHeader } from '@/components/shared/layout/page-header'
 import { EmptyState } from '@/components/shared/feedback/empty-state'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
+import { ListRowCard } from '@/components/shared/data-display/list-row-card'
+import { UserAvatar } from '@/components/shared/data-display/user-avatar'
 import { teamMemberSchema, type TeamMemberInput } from '@/lib/validations/feature'
 import { useGetTeam } from '@/services/team/use-get-team'
 import { invalidateTeam } from '@/lib/invalidate-queries'
@@ -83,8 +85,12 @@ export function TeamList() {
   if (isLoading) return <PageLoader />
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Team" description="Manage team members and roles.">
+    <div className="space-y-6">
+      <PageHeader
+        icon={Users}
+        title="Team"
+        description="Manage team members, roles, and who can own features."
+      >
         <Button onClick={() => setCreateOpen(true)}><Plus className="mr-1.5 h-4 w-4" /> Add Member</Button>
       </PageHeader>
 
@@ -93,10 +99,13 @@ export function TeamList() {
       ) : (
         <ul className="space-y-2">
           {members.map((m) => (
-            <li key={m.id} className="bg-card flex items-center justify-between rounded-lg border px-4 py-3">
-              <div>
-                <p className="font-medium text-sm">{m.full_name}</p>
-                <p className="text-muted-foreground text-xs">{m.email} · {m.role}</p>
+            <ListRowCard key={m.id}>
+              <div className="flex min-w-0 items-center gap-3">
+                <UserAvatar name={m.full_name} size="sm" />
+                <div>
+                  <p className="text-sm font-medium">{m.full_name}</p>
+                  <p className="text-muted-foreground text-xs">{m.email} · {m.role}</p>
+                </div>
               </div>
               <div className="flex gap-1">
                 <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setRoleEdit(m.role); setEditMember(m) }}>
@@ -106,12 +115,17 @@ export function TeamList() {
                   <Trash2 className="h-4 w-4 text-destructive" />
                 </Button>
               </div>
-            </li>
+            </ListRowCard>
           ))}
         </ul>
       )}
 
-      <FormDialog open={createOpen} onOpenChange={setCreateOpen} title="Add Team Member">
+      <FormDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        title="Add Team Member"
+        fieldCount={4}
+      >
         <form onSubmit={handleSubmit(onCreate)} className="space-y-4">
           <FormFieldWrapper label="Full Name" htmlFor="fn" error={errors.fullName} required>
             <Input id="fn" {...register('fullName')} />
@@ -134,7 +148,13 @@ export function TeamList() {
         </form>
       </FormDialog>
 
-      <FormDialog open={!!editMember} onOpenChange={(o) => !o && setEditMember(null)} title="Change Role">
+      <FormDialog
+        open={!!editMember}
+        onOpenChange={(o) => !o && setEditMember(null)}
+        title="Change Role"
+        fieldCount={1}
+        maxWidth="sm"
+      >
         <FormFieldWrapper label="Role">
           <Select value={roleEdit} onValueChange={(v) => setRoleEdit(v as UserRole)}>
             <SelectTrigger><SelectValue /></SelectTrigger>

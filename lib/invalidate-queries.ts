@@ -18,3 +18,24 @@ export function invalidateTeam(queryClient: QueryClient) {
 export function invalidateComments(queryClient: QueryClient, featureId: string) {
   void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.comments, featureId] })
 }
+
+export function invalidateSubtasks(queryClient: QueryClient, featureId: string) {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.subtasks, featureId] })
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.features] })
+}
+
+export function invalidateActivity(queryClient: QueryClient, featureId: string) {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.activity, featureId] })
+}
+
+export function invalidateAttachments(queryClient: QueryClient, featureId: string) {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.attachments, featureId] })
+}
+
+export function invalidateDocs(queryClient: QueryClient, featureId: string) {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.docs, featureId] })
+}
+
+export function invalidateNotifications(queryClient: QueryClient) {
+  void queryClient.invalidateQueries({ queryKey: [QUERY_KEYS.notifications] })
+}

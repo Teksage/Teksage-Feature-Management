@@ -130,6 +130,11 @@
   --sidebar-accent-foreground: oklch(0.652 0.215 142.5);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.652 0.215 142.5 / 0.3);
+
+  /* Page surfaces */
+  --page-mesh-1: oklch(0.652 0.215 142.5 / 0.07);
+  --page-mesh-2: oklch(0.58 0.145 245.5 / 0.06);
+  --surface-elevated: oklch(1 0 0);
 }
 
 /* ── Dark Mode ────────────────────────────────────────────────────────── */
@@ -165,6 +170,10 @@
   --sidebar-accent-foreground: oklch(0.72 0.2 142.5);
   --sidebar-border: oklch(1 0 0 / 0.08);
   --sidebar-ring: oklch(0.652 0.215 142.5 / 0.4);
+
+  --page-mesh-1: oklch(0.72 0.2 142.5 / 0.1);
+  --page-mesh-2: oklch(0.65 0.14 245.5 / 0.08);
+  --surface-elevated: oklch(0.2 0 0);
 }
 
 @layer base {
@@ -172,9 +181,26 @@
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
   }
   html {
     @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .page-mesh {
+    background-color: var(--background);
+    background-image:
+      radial-gradient(ellipse 90% 60% at 0% -10%, var(--page-mesh-1), transparent 55%),
+      radial-gradient(ellipse 70% 50% at 100% 0%, var(--page-mesh-2), transparent 50%);
+  }
+
+  .glass-panel {
+    @apply bg-card/80 border-border/60 shadow-card backdrop-blur-sm;
+  }
+
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-primary to-brand-secondary bg-clip-text text-transparent;
   }
 }

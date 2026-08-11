@@ -24,15 +24,23 @@ export function useGetFeature(id: string) {
       if (error) throw error
       if (!row) return null
 
-      const { data: votes } = await supabase
-        .from('feature_votes')
-        .select('user_id')
-        .eq('feature_id', id)
+      const [{ data: votes }, { data: subtasks }] = await Promise.all([
+        supabase.from('feature_votes').select('user_id').eq('feature_id', id),
+        supabase.from('feature_subtasks').select('is_done').eq('feature_id', id),
+      ])
 
       const voteCount = votes?.length ?? 0
       const hasVoted = votes?.some((v) => v.user_id === user?.id) ?? false
+      const subtaskTotal = subtasks?.length ?? 0
+      const subtaskDone = subtasks?.filter((s) => s.is_done).length ?? 0
 
-      return mapFeatureRow(row as Parameters<typeof mapFeatureRow>[0], voteCount, hasVoted)
+      return mapFeatureRow(
+        row as Parameters<typeof mapFeatureRow>[0],
+        voteCount,
+        hasVoted,
+        subtaskDone,
+        subtaskTotal
+      )
     },
     enabled: !!id,
     staleTime: STALE_TIME.short,

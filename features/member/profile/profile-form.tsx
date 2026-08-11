@@ -4,12 +4,13 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { Loader2 } from 'lucide-react'
+import { Loader2, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { FormFieldWrapper } from '@/components/shared/forms/form-field-wrapper'
 import { PageHeader } from '@/components/shared/layout/page-header'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
+import { FeatureCard } from '@/components/shared/data-display/feature-card'
 import { profileSchema, type ProfileInput } from '@/lib/validations/feature'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
 import { useAuthStore } from '@/store/auth-store'
@@ -52,27 +53,33 @@ export function ProfileForm() {
   if (!user) return <PageLoader />
 
   return (
-    <div className="space-y-6 max-w-md">
-      <PageHeader title="Profile" description="Update your account details." />
+    <div className="mx-auto max-w-lg space-y-6">
+      <PageHeader
+        icon={User}
+        title="Profile"
+        description="Update your account details and display name."
+      />
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <FormFieldWrapper label="Full Name" htmlFor="fullName" error={errors.fullName} required>
-          <Input id="fullName" {...register('fullName')} />
-        </FormFieldWrapper>
+      <FeatureCard contentClassName="space-y-4">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <FormFieldWrapper label="Full Name" htmlFor="fullName" error={errors.fullName} required>
+            <Input id="fullName" {...register('fullName')} />
+          </FormFieldWrapper>
 
-        <FormFieldWrapper label="Email">
-          <Input value={user.email} disabled className="bg-muted/50" />
-        </FormFieldWrapper>
+          <FormFieldWrapper label="Email">
+            <Input value={user.email} disabled className="bg-muted/50" />
+          </FormFieldWrapper>
 
-        <FormFieldWrapper label="Role">
-          <Input value={user.role} disabled className="bg-muted/50" />
-        </FormFieldWrapper>
+          <FormFieldWrapper label="Role">
+            <Input value={user.role} disabled className="bg-muted/50" />
+          </FormFieldWrapper>
 
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Save Changes
-        </Button>
-      </form>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            Save Changes
+          </Button>
+        </form>
+      </FeatureCard>
     </div>
   )
 }

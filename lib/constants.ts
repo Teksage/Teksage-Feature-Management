@@ -7,6 +7,9 @@ export const FEATURE_STATUSES = [
   'Completed',
 ] as const
 
+/** Subtask workflow — subset of feature statuses (no Planned). */
+export const SUBTASK_STATUSES = ['Idea', 'In Progress', 'Completed'] as const
+
 export const FEATURE_PRIORITIES = ['Low', 'Medium', 'High', 'Critical'] as const
 
 /** Where a feature ships — Both appears on Web and App boards. */
@@ -54,6 +57,11 @@ export const QUERY_KEYS = {
   team: 'team',
   dashboardStats: 'dashboard-stats',
   profile: 'profile',
+  subtasks: 'subtasks',
+  activity: 'activity',
+  attachments: 'attachments',
+  docs: 'docs',
+  notifications: 'notifications',
 } as const
 
 export const STALE_TIME = {

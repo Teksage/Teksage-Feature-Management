@@ -1,5 +1,6 @@
 export type UserRole = 'Admin' | 'Member'
 export type FeatureStatus = 'Idea' | 'Planned' | 'In Progress' | 'Completed'
+export type SubtaskStatus = 'Idea' | 'In Progress' | 'Completed'
 export type FeaturePriority = 'Low' | 'Medium' | 'High' | 'Critical'
 export type FeaturePlatform = 'Website' | 'App' | 'Both'
 
@@ -125,6 +126,114 @@ export interface Database {
         }
         Update: {
           body?: string
+        }
+      }
+      feature_subtasks: {
+        Row: {
+          id: string
+          feature_id: string
+          title: string
+          status: SubtaskStatus
+          is_done: boolean
+          sort_order: number
+          assignee_id: string | null
+          created_by: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          feature_id: string
+          title: string
+          status?: SubtaskStatus
+          is_done?: boolean
+          sort_order?: number
+          assignee_id?: string | null
+          created_by: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          title?: string
+          status?: SubtaskStatus
+          is_done?: boolean
+          sort_order?: number
+          assignee_id?: string | null
+          updated_at?: string
+        }
+      }
+      feature_attachments: {
+        Row: {
+          id: string
+          feature_id: string
+          kind: 'file' | 'link'
+          label: string
+          url: string | null
+          storage_path: string | null
+          mime_type: string | null
+          uploaded_by: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          feature_id: string
+          kind: 'file' | 'link'
+          label: string
+          url?: string | null
+          storage_path?: string | null
+          mime_type?: string | null
+          uploaded_by: string
+          created_at?: string
+        }
+        Update: {
+          label?: string
+          url?: string | null
+        }
+      }
+      feature_docs: {
+        Row: {
+          id: string
+          feature_id: string
+          body: string
+          updated_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          feature_id: string
+          body?: string
+          updated_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          updated_by?: string | null
+          updated_at?: string
+        }
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          feature_id: string | null
+          type: string
+          title: string
+          body: string | null
+          read_at: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          feature_id?: string | null
+          type: string
+          title: string
+          body?: string | null
+          read_at?: string | null
+          created_at?: string
+        }
+        Update: {
+          read_at?: string | null
         }
       }
     }

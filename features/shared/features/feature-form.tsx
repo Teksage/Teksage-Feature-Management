@@ -83,7 +83,7 @@ export function FeatureForm({
   const submitting = isSubmitting || busy || upsertCategory.isPending
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="mx-auto w-full max-w-2xl space-y-4">
       <FormFieldWrapper label="Title" htmlFor="title" error={errors.title} required>
         <Input id="title" placeholder="Feature title" {...register('title')} />
       </FormFieldWrapper>
@@ -122,20 +122,22 @@ export function FeatureForm({
         }}
       />
 
-      <FeatureAssigneeField
-        members={members}
-        assigneeId={watch('assigneeId') ?? ''}
-        error={errors.assigneeId}
-        onChange={(id) => setValue('assigneeId', id)}
-      />
-
-      <FormFieldWrapper label="Target Release" error={errors.targetRelease}>
-        <DatePicker
-          value={watch('targetRelease') || ''}
-          onChange={(v) => setValue('targetRelease', v)}
-          placeholder="Pick a release date"
+      <div className="grid gap-4 sm:grid-cols-2">
+        <FeatureAssigneeField
+          members={members}
+          assigneeId={watch('assigneeId') ?? ''}
+          error={errors.assigneeId}
+          onChange={(id) => setValue('assigneeId', id)}
         />
-      </FormFieldWrapper>
+
+        <FormFieldWrapper label="Target Release" error={errors.targetRelease}>
+          <DatePicker
+            value={watch('targetRelease') || ''}
+            onChange={(v) => setValue('targetRelease', v)}
+            placeholder="Pick a release date"
+          />
+        </FormFieldWrapper>
+      </div>
 
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

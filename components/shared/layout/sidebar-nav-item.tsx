@@ -18,9 +18,9 @@ export function SidebarNavItem({ item, isActive, collapsed }: SidebarNavItemProp
     <Link
       href={item.href}
       className={cn(
-        'flex items-center gap-3 rounded-lg px-2 py-2 text-sm font-medium transition-colors',
+        'flex items-center gap-3 rounded-lg px-2.5 py-2 text-sm font-medium transition-all duration-200',
         isActive
-          ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+          ? 'bg-sidebar-accent text-sidebar-accent-foreground shadow-sm ring-1 ring-sidebar-ring'
           : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground',
         collapsed && 'justify-center px-0'
       )}

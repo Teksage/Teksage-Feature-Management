@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { NotificationBell } from '@/components/shared/layout/notification-bell'
 import { useAuthStore } from '@/store/auth-store'
 import { useUIStore } from '@/store/ui-store'
 import { useAuth } from '@/hooks/use-auth'
@@ -25,7 +26,7 @@ export function Navbar() {
   const { theme, setTheme } = useTheme()
 
   return (
-    <header className="bg-background/80 sticky top-0 z-40 flex h-14 items-center justify-between border-b px-4 backdrop-blur">
+    <header className="glass-panel sticky top-0 z-40 flex h-14 items-center justify-between border-b px-4 shadow-sm">
       <Button
         variant="ghost"
         size="icon"
@@ -39,6 +40,8 @@ export function Navbar() {
       <div className="flex-1" />
 
       <div className="flex items-center gap-2">
+        <NotificationBell />
+
         <Button
           variant="ghost"
           size="icon"

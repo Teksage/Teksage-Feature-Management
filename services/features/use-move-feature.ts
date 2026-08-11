@@ -3,8 +3,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import { getSupabaseBrowserClient } from '@/lib/supabase/client'
-import { invalidateFeatures } from '@/lib/invalidate-queries'
+import { invalidateFeatures, invalidateActivity } from '@/lib/invalidate-queries'
 import { QUERY_KEYS, type FeatureBoardTab } from '@/lib/constants'
+import { useAuthStore } from '@/store/auth-store'
 import type { FeatureStatus } from '@/types/supabase.types'
 import type { IFeatureEntity } from './features.types'
 
@@ -14,20 +15,19 @@ interface MovePayload {
   tab: FeatureBoardTab
 }
 
-/**
- * Only the dragged board's status column is written, so a `Both` feature can sit
- * in different columns on Web and App. `status` mirrors it for list/detail views.
- */
 function movePatch(status: FeatureStatus, tab: FeatureBoardTab) {
   return tab === 'Web' ? { status, web_status: status } : { status, app_status: status }
 }
 
 export function useMoveFeature() {
   const queryClient = useQueryClient()
+  const { user } = useAuthStore()
 
   return useMutation({
     mutationFn: async ({ id, status, tab }: MovePayload) => {
+      if (!user) throw new Error('Not authenticated')
       const supabase = getSupabaseBrowserClient()
+
       const { data, error } = await supabase
         .from('features')
         .update(movePatch(status, tab))
@@ -35,8 +35,6 @@ export function useMoveFeature() {
         .select('id')
 
       if (error) throw error
-      // RLS denials update zero rows without raising, which would silently
-      // revert the card on the next refetch.
       if (!data?.length) throw new Error('You do not have permission to move this feature.')
     },
     onMutate: ({ id, status, tab }) => {
@@ -54,8 +52,9 @@ export function useMoveFeature() {
       ctx?.previous.forEach(([key, data]) => queryClient.setQueryData(key, data))
       toast.error(err.message || 'Failed to move feature.')
     },
-    onSettled: () => {
+    onSettled: (_data, _err, vars) => {
       invalidateFeatures(queryClient)
+      invalidateActivity(queryClient, vars.id)
     },
   })
 }
