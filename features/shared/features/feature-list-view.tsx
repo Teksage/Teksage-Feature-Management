@@ -40,7 +40,7 @@ export function FeatureListView({ features, basePath }: FeatureListViewProps) {
     },
     {
       key: 'owner',
-      header: 'Owner',
+      header: 'Assignee',
       cell: (row) => (
         <span className="text-muted-foreground text-sm">
           {row.assignee_full_name ?? 'Unassigned'}

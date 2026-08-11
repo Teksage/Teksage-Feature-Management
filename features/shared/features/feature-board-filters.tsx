@@ -75,7 +75,7 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
   )
   const assigneeItems = useMemo(
     () => ({
-      [ALL]: 'All owners',
+      [ALL]: 'All assignees',
       ...Object.fromEntries(members.map((m) => [m.id, m.full_name])),
     }),
     [members]
@@ -188,17 +188,17 @@ export function FeatureBoardFilters({ values, onChange }: FeatureBoardFiltersPro
           </Select>
         </FilterField>
 
-        <FilterField label="Owner">
+        <FilterField label="Assignee">
           <Select
             items={assigneeItems}
             value={values.assigneeId ?? ALL}
             onValueChange={(v) => patch({ assigneeId: !v || v === ALL ? undefined : v })}
           >
             <SelectTrigger className="h-9 w-full">
-              <SelectValue placeholder="All owners" />
+              <SelectValue placeholder="All assignees" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={ALL}>All owners</SelectItem>
+              <SelectItem value={ALL}>All assignees</SelectItem>
               {members.map((m) => (
                 <SelectItem key={m.id} value={m.id}>
                   {m.full_name}

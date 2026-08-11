@@ -27,7 +27,7 @@ function formatAction(
     case 'priority_changed':
       return `changed priority ${oldValue ?? '?'} → ${newValue ?? '?'}`
     case 'assignee_changed':
-      return newValue ? 'changed the owner' : 'cleared the owner'
+      return newValue ? 'changed the assignee' : 'cleared the assignee'
     case 'commented':
       return 'added a comment'
     case 'subtask_added':

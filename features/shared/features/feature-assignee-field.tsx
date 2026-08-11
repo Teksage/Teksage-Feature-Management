@@ -27,7 +27,7 @@ export function FeatureAssigneeField({
   assigneeId,
   onChange,
   error,
-  label = 'Owner',
+  label = 'Assignee',
   triggerClassName = 'w-full',
 }: FeatureAssigneeFieldProps) {
   const items = useMemo(
@@ -46,7 +46,7 @@ export function FeatureAssigneeField({
         onValueChange={(v) => onChange(!v || v === NO_ASSIGNEE_VALUE ? '' : v)}
       >
         <SelectTrigger className={triggerClassName}>
-          <SelectValue placeholder="Assign owner" />
+          <SelectValue placeholder="Select assignee" />
         </SelectTrigger>
         <SelectContent>
           <SelectItem value={NO_ASSIGNEE_VALUE}>Unassigned</SelectItem>

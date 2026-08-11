@@ -114,7 +114,7 @@ export function FeatureSubtasks({ featureId, canManage }: FeatureSubtasksProps) 
               description={
                 canManage
                   ? 'Break this feature into smaller checklist items.'
-                  : 'Only the assigned owner can add subtasks.'
+                  : 'Only the assignee can add subtasks.'
               }
             />
           </FeatureDetailContent>
