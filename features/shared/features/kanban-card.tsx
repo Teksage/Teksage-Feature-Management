@@ -10,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { StatusBadge } from '@/components/shared/data-display/status-badge'
 import { cn } from '@/utils/cn'
 import { useToggleVote } from '@/services/votes/use-toggle-vote'
 import { useAuthStore } from '@/store/auth-store'
@@ -77,7 +78,10 @@ export function KanbanCard({ feature: f, basePath, onEdit, onDelete }: KanbanCar
         )}
       />
 
-      <p className="line-clamp-2 pl-1 text-sm font-semibold leading-snug">{f.title}</p>
+      <div className="flex items-start justify-between gap-2 pl-1">
+        <p className="line-clamp-2 min-w-0 text-sm font-semibold leading-snug">{f.title}</p>
+        <StatusBadge status={f.priority} className="h-5 shrink-0 px-1.5 text-[10px]" />
+      </div>
 
       <div className="flex items-center justify-between gap-2 pl-1">
         <div className="text-muted-foreground flex min-w-0 items-center gap-2 text-[11px]">

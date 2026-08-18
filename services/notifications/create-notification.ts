@@ -16,14 +16,15 @@ export async function createNotification(
   if (actorId && input.userId === actorId) return
   try {
     const supabase = getSupabaseBrowserClient()
-    await supabase.from('notifications').insert({
+    const { error } = await supabase.from('notifications').insert({
       user_id: input.userId,
       feature_id: input.featureId ?? null,
       type: input.type,
       title: input.title,
       body: input.body ?? null,
     })
-  } catch {
-    /* ignore */
+    if (error) console.warn('[notifications]', error.message)
+  } catch (err) {
+    console.warn('[notifications]', err)
   }
 }

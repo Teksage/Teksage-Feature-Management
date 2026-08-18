@@ -7,9 +7,13 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/utils/cn'
 import { KanbanCard } from './kanban-card'
 import { BOARD_TAB_ACCENT } from './board-tab-accent'
-import { KANBAN_DRAG_TYPE, type FeatureBoardTab } from '@/lib/constants'
+import { FEATURE_PRIORITIES, KANBAN_DRAG_TYPE, type FeatureBoardTab } from '@/lib/constants'
 import type { FeatureStatus } from '@/types/supabase.types'
 import type { IFeatureEntity } from '@/services/features/features.types'
+
+function byPriority(a: IFeatureEntity, b: IFeatureEntity) {
+  return FEATURE_PRIORITIES.indexOf(b.priority) - FEATURE_PRIORITIES.indexOf(a.priority)
+}
 
 const COLUMN_STYLES: Record<FeatureStatus, { header: string; dot: string }> = {
   Idea: { header: 'border-t-muted-foreground/40', dot: 'bg-muted-foreground/50' },
@@ -91,7 +95,7 @@ export function KanbanColumn({
       </div>
 
       <div className="flex min-h-16 flex-1 flex-col gap-2">
-        {features.map((f) => (
+        {[...features].sort(byPriority).map((f) => (
           <KanbanCard
             key={f.id}
             feature={f}
