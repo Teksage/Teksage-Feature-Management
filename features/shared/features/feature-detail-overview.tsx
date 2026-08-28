@@ -31,6 +31,7 @@ interface FeatureDetailOverviewProps {
   onAssigneeChange: (assigneeId: string) => void
   onEdit: () => void
   onDelete: () => void
+  hidePlatform?: boolean
 }
 
 export function FeatureDetailOverview({
@@ -43,6 +44,7 @@ export function FeatureDetailOverview({
   onAssigneeChange,
   onEdit,
   onDelete,
+  hidePlatform = false,
 }: FeatureDetailOverviewProps) {
   return (
     <FeatureDetailPanel>
@@ -95,9 +97,11 @@ export function FeatureDetailOverview({
           {feature.category_name && (
             <span className="text-muted-foreground text-xs">in {feature.category_name}</span>
           )}
+          {hidePlatform ? null : (
           <span className="text-muted-foreground rounded-full border px-2 py-0.5 text-[11px]">
             {feature.platform}
           </span>
+          )}
           <ReleaseCountdown date={feature.target_release} showDate />
         </div>
 

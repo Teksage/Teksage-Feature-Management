@@ -23,6 +23,8 @@ export const FEATURE_BOARD_TABS = [
 
 export type FeatureBoardTab = (typeof FEATURE_BOARD_TABS)[number]['id']
 
+export const FEATURE_DOMAINS = ['product', 'marketing'] as const
+
 export const ROUTES = {
   login: '/login',
   register: '/register',
@@ -32,12 +34,14 @@ export const ROUTES = {
   admin: {
     dashboard: '/admin/dashboard',
     features: '/admin/features',
+    marketing: '/admin/marketing',
     team: '/admin/team',
     profile: '/admin/profile',
   },
   member: {
     dashboard: '/member/dashboard',
     features: '/member/features',
+    marketing: '/member/marketing',
     profile: '/member/profile',
   },
 } as const

@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Lightbulb,
+  Megaphone,
   Users,
   User,
   type LucideIcon,
@@ -29,6 +30,10 @@ export const ADMIN_NAV: NavSection[] = [
     items: [{ label: 'Features', href: ROUTES.admin.features, icon: Lightbulb }],
   },
   {
+    title: 'Marketing',
+    items: [{ label: 'Plans', href: ROUTES.admin.marketing, icon: Megaphone }],
+  },
+  {
     title: 'Team',
     items: [
       { label: 'Members', href: ROUTES.admin.team, icon: Users },
@@ -44,6 +49,10 @@ export const MEMBER_NAV: NavSection[] = [
   {
     title: 'Product',
     items: [{ label: 'Features', href: ROUTES.member.features, icon: Lightbulb }],
+  },
+  {
+    title: 'Marketing',
+    items: [{ label: 'Plans', href: ROUTES.member.marketing, icon: Megaphone }],
   },
   {
     title: 'Account',

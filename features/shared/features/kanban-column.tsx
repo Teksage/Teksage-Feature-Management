@@ -27,6 +27,7 @@ interface KanbanColumnProps {
   tab: FeatureBoardTab
   features: IFeatureEntity[]
   basePath: string
+  addLabel?: string
   onAdd: (status: FeatureStatus) => void
   onEdit: (f: IFeatureEntity) => void
   onDelete: (id: string) => void
@@ -42,6 +43,7 @@ export function KanbanColumn({
   onEdit,
   onDelete,
   onDropFeature,
+  addLabel = 'Add feature',
 }: KanbanColumnProps) {
   const style = COLUMN_STYLES[status]
   const accent = BOARD_TAB_ACCENT[tab]
@@ -113,7 +115,7 @@ export function KanbanColumn({
         onClick={() => onAdd(status)}
       >
         <Plus className="h-3.5 w-3.5" />
-        Add feature
+        {addLabel}
       </Button>
     </div>
   )

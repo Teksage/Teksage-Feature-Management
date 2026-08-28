@@ -11,6 +11,7 @@ export type FeatureStatus = 'Idea' | 'Planned' | 'In Progress' | 'Completed'
 export type SubtaskStatus = 'Idea' | 'In Progress' | 'Completed'
 export type FeaturePriority = 'Low' | 'Medium' | 'High' | 'Critical'
 export type FeaturePlatform = 'Website' | 'App' | 'Both'
+export type FeatureDomain = 'product' | 'marketing'
 
 export interface Database {
   public: {
@@ -70,6 +71,7 @@ export interface Database {
           category_id: string | null
           assignee_id: string | null
           target_release: string | null
+          domain: FeatureDomain
           created_by: string
           created_at: string
           updated_at: string
@@ -86,6 +88,7 @@ export interface Database {
           category_id?: string | null
           assignee_id?: string | null
           target_release?: string | null
+          domain?: FeatureDomain
           created_by: string
           created_at?: string
           updated_at?: string
@@ -101,6 +104,7 @@ export interface Database {
           category_id?: string | null
           assignee_id?: string | null
           target_release?: string | null
+          domain?: FeatureDomain
           updated_at?: string
         }
       }
@@ -248,6 +252,7 @@ export interface Database {
       user_role: UserRole
       feature_status: FeatureStatus
       feature_priority: FeaturePriority
+      feature_domain: FeatureDomain
     }
   }
 }

@@ -5,7 +5,9 @@ interface Props {
   params: Promise<{ id: string }>
 }
 
-export default async function MemberFeatureDetailPage({ params }: Props) {
+export default async function AdminMarketingDetailPage({ params }: Props) {
   const { id } = await params
-  return <FeatureDetail featureId={id} basePath={ROUTES.member.features} domain="product" />
+  return (
+    <FeatureDetail featureId={id} basePath={ROUTES.admin.marketing} domain="marketing" />
+  )
 }

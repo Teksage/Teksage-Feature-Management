@@ -36,6 +36,7 @@ export function useGetFeatures(filters?: IFeatureFilters) {
       if (filters?.categoryId) query = query.eq('category_id', filters.categoryId)
       if (filters?.assigneeId) query = query.eq('assignee_id', filters.assigneeId)
       if (filters?.search) query = query.ilike('title', `%${filters.search}%`)
+      query = query.eq('domain', filters?.domain ?? 'product')
 
       const { data: rows, error } = await query
       if (error) throw error

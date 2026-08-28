@@ -27,6 +27,7 @@ export function useDashboardStats() {
         .from('features')
         .select(FEATURE_SELECT)
         .order('created_at', { ascending: false })
+        .eq('domain', 'product')
       if (error) throw error
 
       const ids = (features ?? []).map((f) => f.id)

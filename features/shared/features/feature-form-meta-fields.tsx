@@ -17,6 +17,7 @@ interface FeatureFormMetaFieldsProps {
   status: FeatureInput['status']
   priority: FeatureInput['priority']
   canManageStatus: boolean
+  hidePlatform?: boolean
   errors: FieldErrors<FeatureInput>
   setValue: UseFormSetValue<FeatureInput>
 }
@@ -26,11 +27,13 @@ export function FeatureFormMetaFields({
   status,
   priority,
   canManageStatus,
+  hidePlatform = false,
   errors,
   setValue,
 }: FeatureFormMetaFieldsProps) {
   return (
     <>
+      {hidePlatform ? null : (
       <FormFieldWrapper label="Platform" error={errors.platform} required>
         <Select
           value={platform}
@@ -50,6 +53,7 @@ export function FeatureFormMetaFields({
           </SelectContent>
         </Select>
       </FormFieldWrapper>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         {canManageStatus && (

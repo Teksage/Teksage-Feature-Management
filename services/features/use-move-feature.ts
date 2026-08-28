@@ -12,11 +12,13 @@ import type { IFeatureEntity } from './features.types'
 interface MovePayload {
   id: string
   status: FeatureStatus
-  tab: FeatureBoardTab
+  tab?: FeatureBoardTab
+  singleBoard?: boolean
 }
 
-function movePatch(status: FeatureStatus, tab: FeatureBoardTab) {
-  return tab === 'Web' ? { status, web_status: status } : { status, app_status: status }
+function movePatch(status: FeatureStatus, tab?: FeatureBoardTab, singleBoard?: boolean) {
+  if (singleBoard) return { status, web_status: status, app_status: status }
+  return tab === 'App' ? { status, app_status: status } : { status, web_status: status }
 }
 
 export function useMoveFeature() {
@@ -24,26 +26,26 @@ export function useMoveFeature() {
   const { user } = useAuthStore()
 
   return useMutation({
-    mutationFn: async ({ id, status, tab }: MovePayload) => {
+    mutationFn: async ({ id, status, tab, singleBoard }: MovePayload) => {
       if (!user) throw new Error('Not authenticated')
       const supabase = getSupabaseBrowserClient()
 
       const { data, error } = await supabase
         .from('features')
-        .update(movePatch(status, tab))
+        .update(movePatch(status, tab, singleBoard))
         .eq('id', id)
         .select('id')
 
       if (error) throw error
       if (!data?.length) throw new Error('You do not have permission to move this feature.')
     },
-    onMutate: ({ id, status, tab }) => {
+    onMutate: ({ id, status, tab, singleBoard }) => {
       const previous = queryClient.getQueriesData<IFeatureEntity[]>({
         queryKey: [QUERY_KEYS.features],
       })
 
       queryClient.setQueriesData<IFeatureEntity[]>({ queryKey: [QUERY_KEYS.features] }, (old) =>
-        old?.map((f) => (f.id === id ? { ...f, ...movePatch(status, tab) } : f))
+        old?.map((f) => (f.id === id ? { ...f, ...movePatch(status, tab, singleBoard) } : f))
       )
 
       return { previous }

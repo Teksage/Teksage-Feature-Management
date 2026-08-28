@@ -7,5 +7,5 @@ interface Props {
 
 export default async function AdminFeatureDetailPage({ params }: Props) {
   const { id } = await params
-  return <FeatureDetail featureId={id} basePath={ROUTES.admin.features} />
+  return <FeatureDetail featureId={id} basePath={ROUTES.admin.features} domain="product" />
 }

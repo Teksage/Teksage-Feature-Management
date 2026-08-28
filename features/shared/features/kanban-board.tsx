@@ -1,36 +1,25 @@
 'use client'
 
-import { useMemo, useState } from 'react'
-import { AlertTriangle, LayoutGrid, List, Kanban } from 'lucide-react'
+import { useState } from 'react'
+import { AlertTriangle, LayoutGrid, List, Kanban, Megaphone } from 'lucide-react'
 import { useDebounce } from '@/hooks/use-debounce'
 import { PageHeader } from '@/components/shared/layout/page-header'
 import { PageLoader } from '@/components/shared/feedback/page-loader'
 import { EmptyState } from '@/components/shared/feedback/empty-state'
-import { FormDialog } from '@/components/shared/forms/form-dialog'
-import { ConfirmDialog } from '@/components/shared/forms/confirm-dialog'
 import { Button } from '@/components/ui/button'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { FeatureForm } from './feature-form'
 import { FeatureBoardFilters, type FeatureBoardFilterValues } from './feature-board-filters'
-import { FeatureListView } from './feature-list-view'
-import { KanbanBoardColumns } from './kanban-board-columns'
-import { BOARD_TAB_ACCENT } from './board-tab-accent'
-import { cn } from '@/utils/cn'
-import {
-  useGetFeatures,
-  useUpsertFeature,
-  useDeleteFeature,
-  useMoveFeature,
-} from '@/services/features'
+import { FeatureBoardWorkspace, countVisibleFeatures, currentTabStatus } from './feature-board-workspace'
+import { FeatureBoardDialogs } from './feature-board-dialogs'
+import { useGetFeatures, useUpsertFeature, useDeleteFeature, useMoveFeature } from '@/services/features'
 import { useAuthStore } from '@/store/auth-store'
 import { canEditFeatureMeta } from '@/utils/feature-permissions'
-import { FEATURE_BOARD_TABS, type FeatureBoardTab } from '@/lib/constants'
-import { matchesBoardTab, statusForTab } from '@/services/features/features.types'
-import type { FeaturePlatform, FeatureStatus } from '@/types/supabase.types'
+import type { FeatureBoardTab } from '@/lib/constants'
+import type { FeatureDomain, FeaturePlatform, FeatureStatus } from '@/types/supabase.types'
 import type { IFeatureEntity } from '@/services/features/features.types'
 
 interface KanbanBoardProps {
   basePath: string
+  domain?: FeatureDomain
 }
 
 const EMPTY_FILTERS: FeatureBoardFilterValues = {
@@ -45,9 +34,10 @@ function defaultPlatformForTab(tab: FeatureBoardTab): FeaturePlatform {
   return tab === 'Web' ? 'Website' : 'App'
 }
 
-export function KanbanBoard({ basePath }: KanbanBoardProps) {
+export function KanbanBoard({ basePath, domain = 'product' }: KanbanBoardProps) {
   const { user } = useAuthStore()
   const isAdmin = canEditFeatureMeta(user)
+  const isMarketing = domain === 'marketing'
   const [tab, setTab] = useState<FeatureBoardTab>('Web')
   const [view, setView] = useState<'board' | 'list'>('board')
   const [filters, setFilters] = useState<FeatureBoardFilterValues>(EMPTY_FILTERS)
@@ -64,19 +54,17 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
   } = useGetFeatures({
     search: debouncedSearch || undefined,
     priority: filters.priority,
-    platform: filters.platform,
+    platform: isMarketing ? undefined : filters.platform,
     categoryId: filters.categoryId,
     assigneeId: filters.assigneeId,
+    domain,
   })
 
   const upsert = useUpsertFeature()
   const deleteFeature = useDeleteFeature()
   const moveFeature = useMoveFeature()
-
-  const tabFeatures = useMemo(
-    () => allFeatures.filter((f) => matchesBoardTab(f, tab)),
-    [allFeatures, tab]
-  )
+  const visibleCount = countVisibleFeatures(allFeatures, domain, tab)
+  const noun = isMarketing ? 'plan' : 'feature'
 
   if (isLoading) return <PageLoader />
 
@@ -84,10 +72,21 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
     <div className="flex flex-col gap-3 pb-6">
       <PageHeader
         dense
-        icon={Kanban}
-        title="Features"
-        description="Track Web and App delivery on separate boards. Drag cards to update status."
-        footer={<FeatureBoardFilters values={filters} onChange={setFilters} />}
+        icon={isMarketing ? Megaphone : Kanban}
+        title={isMarketing ? 'Marketing plans' : 'Features'}
+        description={
+          isMarketing
+            ? 'Plan campaigns and track progress from idea to done.'
+            : 'Track Web and App delivery on separate boards. Drag cards to update status.'
+        }
+        footer={
+          <FeatureBoardFilters
+            values={filters}
+            onChange={setFilters}
+            hidePlatform={isMarketing}
+            searchPlaceholder={isMarketing ? 'Search by plan title…' : undefined}
+          />
+        }
       >
         <div className="flex flex-col items-end gap-2 sm:flex-row sm:items-center">
           <div className="bg-muted/80 inline-flex rounded-xl border p-1 shadow-sm">
@@ -111,7 +110,8 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
             </Button>
           </div>
           <span className="text-muted-foreground bg-muted/50 rounded-full border px-3 py-1 text-xs font-medium tabular-nums">
-            {tabFeatures.length} feature{tabFeatures.length === 1 ? '' : 's'}
+            {visibleCount} {noun}
+            {visibleCount === 1 ? '' : 's'}
           </span>
         </div>
       </PageHeader>
@@ -119,117 +119,71 @@ export function KanbanBoard({ basePath }: KanbanBoardProps) {
       {error && (
         <EmptyState
           icon={AlertTriangle}
-          title="Couldn't load features"
+          title={isMarketing ? "Couldn't load plans" : "Couldn't load features"}
           description={error.message}
         />
       )}
 
-      <Tabs
-        value={tab}
-        onValueChange={(v) => {
-          if (v === 'Web' || v === 'App') setTab(v)
+      <FeatureBoardWorkspace
+        domain={domain}
+        tab={tab}
+        onTabChange={setTab}
+        view={view}
+        features={allFeatures}
+        basePath={basePath}
+        onAdd={(status) => {
+          setCreateStatus(status)
+          setCreateOpen(true)
         }}
-        className="flex flex-col gap-3"
-      >
-        <TabsList>
-          {FEATURE_BOARD_TABS.map((t) => (
-            <TabsTrigger
-              key={t.id}
-              value={t.id}
-              className={cn('min-w-24 px-4', BOARD_TAB_ACCENT[t.id].trigger)}
-            >
-              {t.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
-
-        {FEATURE_BOARD_TABS.map((t) => (
-          <TabsContent key={t.id} value={t.id} className="mt-0 outline-none">
-            {tab === t.id &&
-              (view === 'list' ? (
-                <FeatureListView features={tabFeatures} basePath={basePath} />
-              ) : (
-                <div className="overflow-x-auto pb-2">
-                  <KanbanBoardColumns
-                    tab={tab}
-                    features={tabFeatures}
-                    basePath={basePath}
-                    onAdd={(status) => {
-                      setCreateStatus(status)
-                      setCreateOpen(true)
-                    }}
-                    onEdit={setEditFeature}
-                    onDelete={setDeleteId}
-                    onDropFeature={(featureId, status) => {
-                      const f = allFeatures.find((x) => x.id === featureId)
-                      if (!f || statusForTab(f, tab) === status) return
-                      moveFeature.mutate({ id: featureId, status, tab })
-                    }}
-                  />
-                </div>
-              ))}
-          </TabsContent>
-        ))}
-      </Tabs>
-
-      <FormDialog
-        open={createOpen}
-        onOpenChange={(o) => {
-          if (!o) setCreateOpen(false)
+        onEdit={setEditFeature}
+        onDelete={setDeleteId}
+        onDropFeature={(featureId, status, boardTab) => {
+          const f = allFeatures.find((x) => x.id === featureId)
+          if (!f) return
+          if (currentTabStatus(f, boardTab ?? tab, isMarketing) === status) return
+          moveFeature.mutate({
+            id: featureId,
+            status,
+            tab: boardTab,
+            singleBoard: isMarketing,
+          })
         }}
-        title="New Feature"
-        fieldCount={8}
-      >
-        <FeatureForm
-          defaultValues={{ status: createStatus, platform: defaultPlatformForTab(tab) }}
-          canManageStatus={isAdmin}
-          isSubmitting={upsert.isPending}
-          onSubmit={async (d) => {
-            await upsert.mutateAsync(d)
-            setCreateOpen(false)
-          }}
-        />
-      </FormDialog>
+      />
 
-      {isAdmin && (
-        <FormDialog
-          open={!!editFeature}
-          onOpenChange={(o) => {
-            if (!o) setEditFeature(null)
-          }}
-          title="Edit Feature"
-          fieldCount={8}
-        >
-          {editFeature && (
-            <FeatureForm
-              defaultValues={editFeature}
-              canManageStatus
-              isSubmitting={upsert.isPending}
-              onSubmit={async (d) => {
-                await upsert.mutateAsync({ ...d, id: editFeature.id })
-                setEditFeature(null)
-              }}
-            />
-          )}
-        </FormDialog>
-      )}
-
-      {isAdmin && (
-        <ConfirmDialog
-          open={!!deleteId}
-          onOpenChange={(o) => {
-            if (!o) setDeleteId(null)
-          }}
-          title="Delete Feature"
-          description="This will permanently delete the feature along with its votes and comments."
-          confirmLabel="Delete"
-          variant="destructive"
-          loading={deleteFeature.isPending}
-          onConfirm={() =>
-            deleteFeature.mutate(deleteId!, { onSuccess: () => setDeleteId(null) })
-          }
-        />
-      )}
+      <FeatureBoardDialogs
+        isMarketing={isMarketing}
+        isAdmin={isAdmin}
+        createOpen={createOpen}
+        createStatus={createStatus}
+        createPlatform={isMarketing ? 'Both' : defaultPlatformForTab(tab)}
+        editFeature={editFeature}
+        deleteId={deleteId}
+        isSubmitting={upsert.isPending}
+        isDeleting={deleteFeature.isPending}
+        onCreateOpenChange={setCreateOpen}
+        onEditClose={() => setEditFeature(null)}
+        onDeleteClose={() => setDeleteId(null)}
+        onSubmitCreate={async (d) => {
+          await upsert.mutateAsync({
+            ...d,
+            platform: isMarketing ? 'Both' : d.platform,
+            domain,
+          })
+          setCreateOpen(false)
+        }}
+        onSubmitEdit={async (d, id) => {
+          await upsert.mutateAsync({
+            ...d,
+            id,
+            platform: isMarketing ? 'Both' : d.platform,
+            domain,
+          })
+          setEditFeature(null)
+        }}
+        onConfirmDelete={() =>
+          deleteFeature.mutate(deleteId!, { onSuccess: () => setDeleteId(null) })
+        }
+      />
     </div>
   )
 }

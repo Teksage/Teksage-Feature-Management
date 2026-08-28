@@ -23,14 +23,15 @@ import {
   canManageAssignedFeature,
 } from '@/utils/feature-permissions'
 import type { FeatureInput } from '@/lib/validations/feature'
-import type { FeatureStatus, FeaturePriority } from '@/types/supabase.types'
+import type { FeatureDomain, FeatureStatus, FeaturePriority } from '@/types/supabase.types'
 
 interface FeatureDetailProps {
   featureId: string
   basePath: string
+  domain?: FeatureDomain
 }
 
-export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
+export function FeatureDetail({ featureId, basePath, domain = 'product' }: FeatureDetailProps) {
   const router = useRouter()
   const { user } = useAuthStore()
   const { data: feature, isLoading } = useGetFeature(featureId)
@@ -59,14 +60,19 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
   }
 
   async function handleEdit(data: FeatureInput) {
-    await upsert.mutateAsync({ ...data, id: featureId })
+    await upsert.mutateAsync({
+      ...data,
+      id: featureId,
+      platform: domain === 'marketing' ? 'Both' : data.platform,
+      domain,
+    })
     setEditOpen(false)
   }
 
   async function handleStatusChange(value: FeatureStatus | null) {
     if (!feature || !value || !canManage) return
     try {
-      await upsert.mutateAsync(toPayload({ status: value }))
+      await upsert.mutateAsync({ ...toPayload({ status: value }), domain })
     } catch {
       /* toast via onError */
     }
@@ -75,7 +81,7 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
   async function handlePriorityChange(value: FeaturePriority | null) {
     if (!feature || !value || !canEditMeta) return
     try {
-      await upsert.mutateAsync(toPayload({ priority: value }))
+      await upsert.mutateAsync({ ...toPayload({ priority: value }), domain })
     } catch {
       /* toast via onError */
     }
@@ -84,14 +90,20 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
   async function handleAssigneeChange(assigneeId: string) {
     if (!feature || !canEditMeta) return
     try {
-      await upsert.mutateAsync(toPayload({ assigneeId }))
+      await upsert.mutateAsync({ ...toPayload({ assigneeId }), domain })
     } catch {
       /* toast via onError */
     }
   }
 
   if (isLoading) return <PageLoader />
-  if (!feature) return <p className="text-muted-foreground p-6">Feature not found.</p>
+  if (!feature || feature.domain !== domain) {
+    return (
+      <p className="text-muted-foreground p-6">
+        {domain === 'marketing' ? 'Plan not found.' : 'Feature not found.'}
+      </p>
+    )
+  }
 
   return (
     <div className="flex w-full min-w-0 flex-1 flex-col gap-5">
@@ -135,6 +147,7 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
             onAssigneeChange={handleAssigneeChange}
             onEdit={() => setEditOpen(true)}
             onDelete={() => setDeleteOpen(true)}
+            hidePlatform={domain === 'marketing'}
           />
         </TabsContent>
         <TabsContent value="subtasks" className="mt-0 min-h-0 flex-1 outline-none">
@@ -152,11 +165,18 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
       </Tabs>
 
       {canEditMeta && (
-        <FormDialog open={editOpen} onOpenChange={setEditOpen} title="Edit Feature" fieldCount={8}>
+        <FormDialog
+          open={editOpen}
+          onOpenChange={setEditOpen}
+          title={domain === 'marketing' ? 'Edit plan' : 'Edit Feature'}
+          fieldCount={domain === 'marketing' ? 7 : 8}
+        >
           <FeatureForm
             defaultValues={feature}
             canManageStatus
+            hidePlatform={domain === 'marketing'}
             isSubmitting={upsert.isPending}
+            submitLabel={domain === 'marketing' ? 'Update plan' : undefined}
             onSubmit={handleEdit}
           />
         </FormDialog>
@@ -166,8 +186,12 @@ export function FeatureDetail({ featureId, basePath }: FeatureDetailProps) {
         <ConfirmDialog
           open={deleteOpen}
           onOpenChange={setDeleteOpen}
-          title="Delete Feature"
-          description="This will permanently delete the feature."
+          title={domain === 'marketing' ? 'Delete plan' : 'Delete Feature'}
+          description={
+            domain === 'marketing'
+              ? 'This will permanently delete the marketing plan.'
+              : 'This will permanently delete the feature.'
+          }
           confirmLabel="Delete"
           variant="destructive"
           loading={deleteFeature.isPending}

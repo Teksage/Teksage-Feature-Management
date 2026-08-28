@@ -10,6 +10,8 @@ interface KanbanBoardColumnsProps {
   tab: FeatureBoardTab
   features: IFeatureEntity[]
   basePath: string
+  byPrimaryStatus?: boolean
+  addLabel?: string
   onAdd: (status: FeatureStatus) => void
   onEdit: (f: IFeatureEntity) => void
   onDelete: (id: string) => void
@@ -24,6 +26,8 @@ export function KanbanBoardColumns({
   onEdit,
   onDelete,
   onDropFeature,
+  byPrimaryStatus = false,
+  addLabel,
 }: KanbanBoardColumnsProps) {
   return (
     <div className="flex min-w-max gap-3">
@@ -32,8 +36,11 @@ export function KanbanBoardColumns({
           key={status}
           status={status}
           tab={tab}
-          features={features.filter((f) => statusForTab(f, tab) === status)}
+          features={features.filter((f) =>
+            byPrimaryStatus ? f.status === status : statusForTab(f, tab) === status
+          )}
           basePath={basePath}
+          addLabel={addLabel}
           onAdd={onAdd}
           onEdit={onEdit}
           onDelete={onDelete}

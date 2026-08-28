@@ -1,4 +1,5 @@
 import type {
+  FeatureDomain,
   FeaturePlatform,
   FeaturePriority,
   FeatureStatus,
@@ -17,6 +18,7 @@ export interface IFeatureEntity {
   category_id: string | null
   assignee_id: string | null
   target_release: string | null
+  domain: FeatureDomain
   created_by: string
   created_at: string
   updated_at: string
@@ -36,6 +38,7 @@ export interface IFeatureFilters {
   categoryId?: string
   assigneeId?: string
   search?: string
+  domain?: FeatureDomain
 }
 
 /** Status shown on a given board tab (Both features track Web/App separately). */

@@ -25,6 +25,8 @@ interface FeatureFormProps {
   }
   canManageStatus?: boolean
   isSubmitting?: boolean
+  hidePlatform?: boolean
+  submitLabel?: string
   onSubmit: (data: FeatureInput) => void | Promise<void>
 }
 
@@ -32,6 +34,8 @@ export function FeatureForm({
   defaultValues,
   canManageStatus = false,
   isSubmitting = false,
+  hidePlatform = false,
+  submitLabel,
   onSubmit,
 }: FeatureFormProps) {
   const { data: categories = [] } = useGetCategories()
@@ -85,14 +89,18 @@ export function FeatureForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="mx-auto w-full max-w-2xl space-y-4">
       <FormFieldWrapper label="Title" htmlFor="title" error={errors.title} required>
-        <Input id="title" placeholder="Feature title" {...register('title')} />
+        <Input
+          id="title"
+          placeholder={hidePlatform ? 'Plan title' : 'Feature title'}
+          {...register('title')}
+        />
       </FormFieldWrapper>
 
       <FormFieldWrapper label="Description" htmlFor="description" error={errors.description}>
         <Textarea
           id="description"
           rows={3}
-          placeholder="Describe the feature…"
+          placeholder={hidePlatform ? 'Describe the plan…' : 'Describe the feature…'}
           {...register('description')}
         />
       </FormFieldWrapper>
@@ -102,6 +110,7 @@ export function FeatureForm({
         status={watch('status')}
         priority={watch('priority')}
         canManageStatus={canManageStatus}
+        hidePlatform={hidePlatform}
         errors={errors}
         setValue={setValue}
       />
@@ -141,7 +150,7 @@ export function FeatureForm({
 
       <Button type="submit" className="w-full" disabled={submitting}>
         {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-        {defaultValues?.id ? 'Update Feature' : 'Create Feature'}
+        {submitLabel ?? (defaultValues?.id ? 'Update Feature' : 'Create Feature')}
       </Button>
     </form>
   )
